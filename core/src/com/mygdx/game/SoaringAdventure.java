@@ -6,6 +6,7 @@ public class SoaringAdventure extends Game {
 	@Override
 	public void create() {
 		setScreen(new MainMenuScreen(this));
+		//setScreen(new Level2Screen(this));
 	}
 
 	@Override

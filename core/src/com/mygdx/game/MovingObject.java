@@ -2,70 +2,42 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Vector2;
 
-public class MovingObject {
-    private Texture texture;
-    private Vector2 position;
+public class MovingObject extends GameObject {
+    private float screenWidth, screenHeight;
     private float speed;
     private float scale;
 
     public MovingObject(Texture texture, float screenWidth, float screenHeight, float speed, float scale) {
-        this.texture = texture;
+        super(screenWidth / 4 - texture.getWidth() * scale / 4, screenHeight / 2 - texture.getHeight() * scale / 2,
+                texture.getWidth() * scale, texture.getHeight() * scale, texture);
+        this.screenWidth = screenWidth;
+        this.screenHeight = screenHeight;
         this.speed = speed;
         this.scale = scale;
-        this.position = new Vector2(screenWidth / 4 - (texture.getWidth() * scale) / 2, screenHeight / 2 - (texture.getHeight() * scale) / 2);
     }
 
     public void update(float delta) {
-
+        // Update object position or state here if necessary
     }
 
     public void render(SpriteBatch batch) {
-        batch.draw(texture, position.x, position.y, texture.getWidth() * scale, texture.getHeight() * scale);
-    }
-
-    public void dispose() {
-        texture.dispose();
+        batch.draw(texture, x, y, width, height);
     }
 
     public void moveLeft(float delta) {
-        position.x -= speed * delta;
+        x = Math.max(0, x - speed * delta);
     }
 
     public void moveRight(float delta) {
-        position.x += speed * delta;
+        x = Math.min(screenWidth - width, x + speed * delta);
     }
 
     public void moveUp(float delta) {
-        position.y += speed * delta;
+        y = Math.min(screenHeight - height, y + speed * delta);
     }
 
     public void moveDown(float delta) {
-        position.y -= speed * delta;
-    }
-
-    public Vector2 getPosition() {
-        return position;
-    }
-
-    public float getWidth() {
-        return texture.getWidth() * scale;
-    }
-
-    public float getHeight() {
-        return texture.getHeight() * scale;
-    }
-
-    public float getX() {
-        return position.x;
-    }
-
-    public float getY() {
-        return position.y;
-    }
-
-    public Texture getTexture() {
-        return texture;
+        y = Math.max(0, y - speed * delta);
     }
 }
