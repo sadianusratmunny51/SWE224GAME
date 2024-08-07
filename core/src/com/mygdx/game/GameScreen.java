@@ -154,6 +154,9 @@ public class GameScreen extends AbstractScreen {
             layout.setText(font, scoreText);
             font.draw(batch, scoreText, Gdx.graphics.getWidth() - layout.width - 10, Gdx.graphics.getHeight() - 10);
         }
+        if (score >= 500) {
+            game.setScreen(new Level2Screen(game));
+        }
 
         for (TemporaryMessage message : messages) {
             message.render(batch);
