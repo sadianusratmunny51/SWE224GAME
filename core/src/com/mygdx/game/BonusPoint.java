@@ -44,4 +44,3 @@ public class BonusPoint {
         texture.dispose();
     }
 }
-

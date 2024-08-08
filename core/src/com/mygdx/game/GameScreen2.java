@@ -57,7 +57,7 @@ public class GameScreen2 extends AbstractScreen {
         background2 = new Texture("background.png");
         backgroundX = 0;
         backgroundX2 = background.getWidth();
-        backgroundSpeed = 600;
+        backgroundSpeed = 800;
 
         Texture img = new Texture("object1.png");
         float screenWidth = Gdx.graphics.getWidth();
@@ -197,7 +197,7 @@ public class GameScreen2 extends AbstractScreen {
         timeSinceLastSpawnObstacle1 += delta;
         timeSinceLastSpawnObstacle2 += delta;
 
-        if (timeSinceLastSpawnObstacle1 >= 5.0f && (obstacles.isEmpty() || timeSinceLastSpawnObstacle1 >= maxSpawnInterval)) {
+        if (timeSinceLastSpawnObstacle1 >= 3.0f && (obstacles.isEmpty() || timeSinceLastSpawnObstacle1 >= maxSpawnInterval)) {
             spawnobject(obstacleTextures[0]);
             timeSinceLastSpawnObstacle1 = 0;
         }

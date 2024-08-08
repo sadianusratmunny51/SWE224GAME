@@ -9,7 +9,7 @@ public class MovingObject extends GameObject {
     private float scale;
 
     public MovingObject(Texture texture, float screenWidth, float screenHeight, float speed, float scale) {
-        super(screenWidth / 4 - texture.getWidth() * scale / 4, screenHeight / 2 - texture.getHeight() * scale / 2,
+        super((screenWidth / 4 -150) - texture.getWidth() * scale / 4, screenHeight / 2 - texture.getHeight() * scale / 2,
                 texture.getWidth() * scale, texture.getHeight() * scale, texture);
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;

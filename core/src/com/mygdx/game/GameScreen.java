@@ -150,7 +150,7 @@ public class GameScreen extends AbstractScreen {
             layout.setText(font, gameOverText);
             font.draw(batch, gameOverText, (Gdx.graphics.getWidth() - layout.width) / 2, (Gdx.graphics.getHeight() + layout.height) / 2);
             backgroundSpeed = 0;
-             scoreText = "Score: " + (int) score;
+            scoreText = "Score: " + (int) score;
             layout.setText(font, scoreText);
             font.draw(batch, scoreText, Gdx.graphics.getWidth() - layout.width - 10, Gdx.graphics.getHeight() - 10);
         }
@@ -197,7 +197,7 @@ public class GameScreen extends AbstractScreen {
         timeSinceLastSpawnObstacle1 += delta;
         timeSinceLastSpawnObstacle2 += delta;
 
-        if (timeSinceLastSpawnObstacle1 >= 5.0f && (obstacles.isEmpty() || timeSinceLastSpawnObstacle1 >= maxSpawnInterval)) {
+        if (timeSinceLastSpawnObstacle1 >= 8.0f && (obstacles.isEmpty() || timeSinceLastSpawnObstacle1 >= maxSpawnInterval)) {
             spawnobject(obstacleTextures[0]);
             timeSinceLastSpawnObstacle1 = 0;
         }
@@ -276,9 +276,9 @@ public class GameScreen extends AbstractScreen {
                 }
 
             }
-           if(validPosition) {
-               bonusItems.add(new BonusItem(bonusX, bonusY, bonusWidth, bonusHeight, bonusTexture));
-           }
+            if(validPosition) {
+                bonusItems.add(new BonusItem(bonusX, bonusY, bonusWidth, bonusHeight, bonusTexture));
+            }
             timeSinceLastSpawnBonus = 0;
         }
     }
