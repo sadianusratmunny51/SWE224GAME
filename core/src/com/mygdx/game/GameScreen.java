@@ -48,6 +48,7 @@ public class GameScreen extends AbstractScreen {
 
     private boolean isGameOver;
     private ArrayList<TemporaryMessage> messages;
+    private float timeSinceGameOver = 0f;
 
     public GameScreen(SoaringAdventure game) {
         super(game);
@@ -153,8 +154,14 @@ public class GameScreen extends AbstractScreen {
             scoreText = "Score: " + (int) score;
             layout.setText(font, scoreText);
             font.draw(batch, scoreText, Gdx.graphics.getWidth() - layout.width - 10, Gdx.graphics.getHeight() - 10);
+
+            timeSinceGameOver += Gdx.graphics.getDeltaTime();
+            if (timeSinceGameOver >= 2f) {
+                game.setScreen(new GameOverScreen(game));
+            }
+
         }
-        if (score >= 500) {
+        if (score >=1000) {
             game.setScreen(new Level2Screen(game));
         }
 

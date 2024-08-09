@@ -55,7 +55,9 @@ public class Level2Screen extends AbstractScreen {
                 game.setScreen(new GameScreen2(game));  // Assuming GameScreen handles both levels
             }
             if (dismissButtonBounds.contains(touchPos)) {
-                Gdx.app.exit();
+
+                game.setScreen(new GameOverScreen(game));
+               // Gdx.app.exit();
             }
         }
     }
