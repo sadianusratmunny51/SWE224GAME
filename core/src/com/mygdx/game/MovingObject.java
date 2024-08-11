@@ -2,6 +2,7 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
 
 public class MovingObject extends GameObject {
     private float screenWidth, screenHeight;
@@ -19,6 +20,11 @@ public class MovingObject extends GameObject {
 
     public void update(float delta) {
         // Update object position or state here if necessary
+    }
+    public boolean overlaps(GameObject other) {
+        Rectangle obstacleRect = new Rectangle(x, y, width, height);
+        Rectangle otherRect = new Rectangle(other.getX(), other.getY(), other.getWidth(), other.getHeight());
+        return obstacleRect.overlaps(otherRect);
     }
 
     public void render(SpriteBatch batch) {

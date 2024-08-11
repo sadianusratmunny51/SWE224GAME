@@ -23,19 +23,24 @@ public class GameScreen2 extends AbstractScreen {
 
     private MovingObject movingObject;
     private ArrayList<Obstacle> obstacles;
+    private ArrayList<Coins> coins;
     private ArrayList<BonusItem> bonusItems;
 
     private Random random;
 
     private int score;
+    private int coinCount = 0;
     private BitmapFont font;
     private GlyphLayout layout;
 
     private Texture[] obstacleTextures;
+    private Texture[] coinsTexture;
     private Texture bonusTexture;
 
     private float timeSinceLastSpawnObstacle1;
     private float timeSinceLastSpawnObstacle2;
+    private float timeSinceLastSpawnCoins;
+
     private float minSpawnInterval;
     private float maxSpawnInterval;
     private float timeSinceLastSpawnBonus;
@@ -49,6 +54,12 @@ public class GameScreen2 extends AbstractScreen {
     private boolean isGameOver;
     private ArrayList<TemporaryMessage> messages;
     private float timeSinceGameOver = 0f;
+
+    // Constants for the number of coins and spacing
+    private static final int COINS_IN_ROW = 5;
+    private static final float COIN_SPACING = 10.0f;
+    private static final float COIN_SPEED = 200.0f;
+
 
     public GameScreen2(SoaringAdventure game) {
         super(game);
@@ -67,6 +78,8 @@ public class GameScreen2 extends AbstractScreen {
         movingObject = new MovingObject(img, screenWidth, screenHeight, 200, scale);
 
         obstacles = new ArrayList<>();
+        coins = new ArrayList<>();
+
         bonusItems = new ArrayList<>();
         random = new Random();
 
@@ -80,11 +93,17 @@ public class GameScreen2 extends AbstractScreen {
                 new Texture("obstacle1.png"),
                 new Texture("obstacle2.png")
         };
+        coinsTexture = new Texture[]{
+                new Texture("coins2.png")
+        };
+
 
         bonusTexture = new Texture("bonus.png");
 
         timeSinceLastSpawnObstacle1 = 0;
         timeSinceLastSpawnObstacle2 = 0;
+        timeSinceLastSpawnCoins = 0;
+
         minSpawnInterval = 0.5f;
         maxSpawnInterval = 1.5f;
         timeSinceLastSpawnBonus = 0;
@@ -122,8 +141,11 @@ public class GameScreen2 extends AbstractScreen {
             score += delta * 57.5f;
 
             spawnObstacles(delta);
+            spawnCoins(delta);
+
             spawnBonusItem(delta);
             updateObstacles(delta);
+            updateCoins(delta);
             updateBonusItems(delta);
         }
 
@@ -134,6 +156,9 @@ public class GameScreen2 extends AbstractScreen {
 
         movingObject.render(batch);
 
+
+
+
         for (Obstacle obstacle : obstacles) {
             obstacle.render(batch);
         }
@@ -141,10 +166,19 @@ public class GameScreen2 extends AbstractScreen {
         for (BonusItem bonusItem : bonusItems) {
             bonusItem.render(batch);
         }
+        for (Coins coin : coins) {
+            coin.render(batch);
+        }
 
         String scoreText = "Score: " + (int) score;
         layout.setText(font, scoreText);
         font.draw(batch, scoreText, Gdx.graphics.getWidth() - layout.width - 10, Gdx.graphics.getHeight() - 10);
+
+        String coinText = "Coin: " + (int) coinCount;
+        layout.setText(font, coinText);
+        font.draw(batch, coinText, Gdx.graphics.getWidth() - layout.width - 40, Gdx.graphics.getHeight() - 40);
+
+
 
         if (isGameOver) {
             String gameOverText = "Game Over";
@@ -195,6 +229,24 @@ public class GameScreen2 extends AbstractScreen {
         }
         if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
             movingObject.moveDown(delta);
+        }
+    }
+    private void spawnCoins(float delta) {
+         timeSinceLastSpawnCoins += delta;
+
+        if (timeSinceLastSpawnCoins >= 3.0f && (coins.isEmpty() || timeSinceLastSpawnCoins >= 1.5f)) {
+            float coinX = Gdx.graphics.getWidth();
+            float coinY = random.nextFloat() * (Gdx.graphics.getHeight() * 0.75f) + Gdx.graphics.getHeight() * 0.25f;
+            float coinWidth = 40;
+            float coinHeight = 40;
+
+            // Spawn multiple coins in a row
+            for (int i = 0; i < COINS_IN_ROW; i++) {
+                Coins coin = new Coins(coinsTexture[0], coinX + i * (coinWidth + COIN_SPACING), coinY, coinWidth, coinHeight, COIN_SPEED);
+                coins.add(coin);
+            }
+
+            timeSinceLastSpawnCoins = 0;
         }
     }
 
@@ -339,6 +391,24 @@ public class GameScreen2 extends AbstractScreen {
 
         bonusItems.removeIf(bonusItem -> bonusItem.getX() + bonusItem.getWidth() < 0);
     }
+    private void updateCoins(float delta) {
+        Iterator<Coins> coinIterator = coins.iterator();
+        while (coinIterator.hasNext()) {
+            Coins coin = coinIterator.next();
+            coin.update(Gdx.graphics.getDeltaTime());
+
+            if (coin.getX() + coin.getWidth() < 0) {
+                coinIterator.remove();
+            }
+
+            if (movingObject.overlaps(coin)) {
+                coinCount++;
+                coinIterator.remove();
+//                TemporaryMessage message = new TemporaryMessage("+1 Coin", 2.0f, coin.getX(), coin.getY());
+//                messages.add(message);
+            }
+        }
+    }
 
     private void addTemporaryMessage(String message, float x, float y, float duration) {
         messages.add(new TemporaryMessage(message, x, y, font, duration));
@@ -362,6 +432,8 @@ public class GameScreen2 extends AbstractScreen {
 //        game.setScreen(new Level2Screen(this));
 //    }
 
+
+
     @Override
     public void resize(int width, int height) {}
 
@@ -383,6 +455,10 @@ public class GameScreen2 extends AbstractScreen {
         for (Texture texture : obstacleTextures) {
             texture.dispose();
         }
+        for (Texture texture : coinsTexture) {
+            texture.dispose();
+        }
+
         bonusTexture.dispose();
         font.dispose();
     }

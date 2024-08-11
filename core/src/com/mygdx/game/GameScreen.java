@@ -161,7 +161,7 @@ public class GameScreen extends AbstractScreen {
             }
 
         }
-        if (score >=1000) {
+        if (score >=1) {
             game.setScreen(new Level2Screen(game));
         }
 
