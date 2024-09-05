@@ -1,7 +1,10 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -19,9 +22,21 @@ public class GameOverScreen extends AbstractScreen {
     private Rectangle sentenceButtonBounds;
     private SpriteBatch batch;
 
-    public GameOverScreen(SoaringAdventure game) {
+
+    private BitmapFont font;
+    private GlyphLayout layout;
+    private int finalScore;
+    private int totalCoin;
+
+    public GameOverScreen(SoaringAdventure game,int finalScore,int totalCoin) {
         super(game);
+        this.finalScore = finalScore;
+        this.totalCoin=totalCoin;
         batch = new SpriteBatch();
+        font = new BitmapFont();
+        font.getData().setScale(3.0f);
+        font.setColor(Color.BLACK);
+        layout = new GlyphLayout();
         yesButton = new Texture("yes.png");
         noButton = new Texture("no.png");
         iconButton=new Texture("adv.png");
@@ -47,6 +62,15 @@ public class GameOverScreen extends AbstractScreen {
         batch.draw(noButton, noButtonBounds.x, noButtonBounds .y, noButtonBounds.width, noButtonBounds.height);
         batch.draw(iconButton, iconButtonBounds.x, iconButtonBounds.y, iconButtonBounds.width, iconButtonBounds.height);
         //batch.draw(sentenceButton, sentenceButtonBounds.x, sentenceButtonBounds.y, sentenceButtonBounds.width, sentenceButtonBounds.height);
+
+        String scoreText = "Final Score: " + finalScore;
+        layout.setText(font, scoreText);
+        font.draw(batch, scoreText, (Gdx.graphics.getWidth() - layout.width) / 2, (Gdx.graphics.getHeight() + layout.height) / 2+30 );
+
+        String coinText = "Total Coins: " + totalCoin;
+        layout.setText(font, coinText);
+        font.draw(batch, coinText, (Gdx.graphics.getWidth() - layout.width) / 2, (Gdx.graphics.getHeight() + layout.height) / 2 - 50);
+
         batch.end();
 
         if (Gdx.input.isTouched()) {

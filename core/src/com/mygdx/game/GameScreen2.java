@@ -170,6 +170,11 @@ public class GameScreen2 extends AbstractScreen {
             coin.render(batch);
         }
 
+        String levelText = "Level 2 " ;
+        layout.setText(font, levelText);
+        font.draw(batch, levelText, Gdx.graphics.getWidth() - layout.width - 600, Gdx.graphics.getHeight() - 10);
+
+
         String scoreText = "Score: " + (int) score;
         layout.setText(font, scoreText);
         font.draw(batch, scoreText, Gdx.graphics.getWidth() - layout.width - 10, Gdx.graphics.getHeight() - 10);
@@ -190,7 +195,7 @@ public class GameScreen2 extends AbstractScreen {
             font.draw(batch, scoreText, Gdx.graphics.getWidth() - layout.width - 10, Gdx.graphics.getHeight() - 10);
             timeSinceGameOver += Gdx.graphics.getDeltaTime();
             if (timeSinceGameOver >= 1.0f) {
-                game.setScreen(new GameOverScreen(game));
+                game.setScreen(new GameOverScreen(game, (int) score,(int) coinCount));
             }
         }
 //        if (score >= 1000) {
@@ -350,7 +355,7 @@ public class GameScreen2 extends AbstractScreen {
             // Check collision with obstacle1
             if (obstacle.getTexture() == obstacleTextures[0] && checkCollision(movingObject, obstacle)) {
                 isGameOver = true;
-                font.getData().setScale(3.0f);
+                font.getData().setScale(2.0f);
                 break;
             }
 

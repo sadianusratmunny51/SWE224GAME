@@ -18,6 +18,9 @@ public class Level2Screen extends AbstractScreen {
     private Rectangle iconButtonBounds;
     private Rectangle sentenceButtonBounds;
     private SpriteBatch batch;
+    float score;
+    float coinCount;
+
 
     public Level2Screen(SoaringAdventure game) {
         super(game);
@@ -56,7 +59,7 @@ public class Level2Screen extends AbstractScreen {
             }
             if (dismissButtonBounds.contains(touchPos)) {
 
-                game.setScreen(new GameOverScreen(game));
+                game.setScreen(new GameOverScreen(game, (int) score,(int) coinCount));
                // Gdx.app.exit();
             }
         }
