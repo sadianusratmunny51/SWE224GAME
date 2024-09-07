@@ -4,18 +4,17 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 
-public class Obstacle extends GameObject {
-    public Obstacle(float x, float y, float width, float height, Texture texture) {
+public class Bag extends GameObject{
+    public Bag(float x, float y, float width, float height, Texture texture) {
         super(x, y, width, height, texture);
     }
     public void render(SpriteBatch batch) {
         batch.draw(texture, x, y, width, height);
     }
 
-    public void update(float delta,float backgroundspeed) {
-        if (backgroundspeed==0) x=0;
+    public void update(float delta,float backgroundSpeed) {
+        if(backgroundSpeed==0) x=0;
         x -= 200 * delta;
-
     }
 
     public Texture getTexture() {

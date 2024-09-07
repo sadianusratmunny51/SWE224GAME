@@ -46,4 +46,5 @@ public class MovingObject extends GameObject {
     public void moveDown(float delta) {
         y = Math.max(0, y - speed * delta);
     }
+
 }

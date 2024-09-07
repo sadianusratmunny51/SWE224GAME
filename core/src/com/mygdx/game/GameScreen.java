@@ -22,6 +22,7 @@ public class GameScreen extends AbstractScreen {
     private float backgroundSpeed;
 
     private MovingObject movingObject;
+   // private Texture bag;
     private ArrayList<Obstacle> obstacles;
     private ArrayList<BonusItem> bonusItems;
 
@@ -50,6 +51,11 @@ public class GameScreen extends AbstractScreen {
     private boolean isGameOver;
     private ArrayList<TemporaryMessage> messages;
     private float timeSinceGameOver = 0f;
+    private Bag bag;
+    private boolean isBagSpawned;
+    private boolean bagCollected = false;  // Flag to track if the bag was collected
+    private float bagCollectedTimer = 0;
+    private boolean gamePaused = false;
 
     public GameScreen(SoaringAdventure game) {
         super(game);
@@ -83,6 +89,7 @@ public class GameScreen extends AbstractScreen {
         };
 
         bonusTexture = new Texture("bonus.png");
+       // bag=new Texture("bag.png");
 
         timeSinceLastSpawnObstacle1 = 0;
         timeSinceLastSpawnObstacle2 = 0;
@@ -97,6 +104,8 @@ public class GameScreen extends AbstractScreen {
         shapeRenderer = new ShapeRenderer();
 
         isGameOver = false;
+        bag = null;
+        isBagSpawned = false;
 
     }
 
@@ -126,12 +135,48 @@ public class GameScreen extends AbstractScreen {
             spawnBonusItem(delta);
             updateObstacles(delta);
             updateBonusItems(delta);
-        }
+            if (score >= 500 && !isBagSpawned) {
+                spawnBag();
+            }
 
+            if (bag != null) {
+                bag.update(delta,backgroundSpeed);
+
+
+                if (bag.overlaps(movingObject)) {
+
+                    addTemporaryMessage("Woh! Bag Collected", movingObject.getPosition().x + movingObject.getWidth()+200 / 2, movingObject.getPosition().y + movingObject.getHeight() / 2, 4.0f);
+                    bagCollected = true;
+                    bagCollectedTimer = 0;
+                   // bag = null;
+                    isBagSpawned =true;
+                    backgroundSpeed=0;
+
+
+
+                }
+
+
+                if (bag.getX() + bag.getWidth() < 0) {
+                    isBagSpawned = false;
+                    bag = null;
+                }
+            }
+        }
+        if (bagCollected) {
+
+
+            bagCollectedTimer += delta;
+            gamePaused = true;
+
+            if (bagCollectedTimer >= 4.0) {
+                game.setScreen(new Level2Screen(game));
+            }
+        }
         batch.begin();
 
         batch.draw(background, backgroundX, 0, background.getWidth(), Gdx.graphics.getHeight());
-        batch.draw(background2, backgroundX2, 0, background2.getWidth(), Gdx.graphics.getHeight());
+        batch.draw(background2,backgroundX2, 0, background2.getWidth(), Gdx.graphics.getHeight());
 
         movingObject.render(batch);
 
@@ -142,6 +187,10 @@ public class GameScreen extends AbstractScreen {
         for (BonusItem bonusItem : bonusItems) {
             bonusItem.render(batch);
         }
+        if (bag != null) {
+            bag.render(batch);
+        }
+
         String levelText = "Level 1 " ;
         layout.setText(font, levelText);
         font.draw(batch, levelText, Gdx.graphics.getWidth() - layout.width - 600, Gdx.graphics.getHeight() - 10);
@@ -188,6 +237,7 @@ public class GameScreen extends AbstractScreen {
         for (TemporaryMessage message : messages) {
             message.update(delta);
         }
+
     }
 
     private void handleInput(float delta) {
@@ -203,6 +253,12 @@ public class GameScreen extends AbstractScreen {
         if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
             movingObject.moveDown(delta);
         }
+    }
+    private void spawnBag(){
+        float bagX = Gdx.graphics.getWidth();
+        float bagY = random.nextFloat() * (Gdx.graphics.getHeight() * 0.5f) + Gdx.graphics.getHeight() * 0.25f;
+        bag = new Bag(bagX, bagY, 80, 80, new Texture("bag.png"));
+        isBagSpawned = true;
     }
 
     private void spawnObstacles(float delta) {
@@ -300,7 +356,7 @@ public class GameScreen extends AbstractScreen {
 
         while (((Iterator<?>) obstacleIterator).hasNext()) {
             Obstacle obstacle = obstacleIterator.next();
-            obstacle.update(delta);
+            obstacle.update(delta,backgroundSpeed);
 
             // Check collision with obstacle1
             if (obstacle.getTexture() == obstacleTextures[0] && checkCollision(movingObject, obstacle)) {
@@ -334,7 +390,7 @@ public class GameScreen extends AbstractScreen {
 
     private void updateBonusItems(float delta) {
         for (BonusItem bonusItem : bonusItems) {
-            bonusItem.update(delta);
+            bonusItem.update(delta,backgroundSpeed);
 
             if (checkCollision(movingObject, bonusItem)) {
                 score += 500;
@@ -361,13 +417,11 @@ public class GameScreen extends AbstractScreen {
 //    }
 
     private boolean checkCollision(GameObject a, GameObject b) {
+//
+
         return a.getX() < b.getX() + b.getWidth() && a.getX() + a.getWidth() > b.getX() &&
                 a.getY() < b.getY() + b.getHeight() && a.getY() + a.getHeight() > b.getY();
     }
-//    public void create() {
-//        if(score>1000)
-//        game.setScreen(new Level2Screen(this));
-//    }
 
     @Override
     public void resize(int width, int height) {}

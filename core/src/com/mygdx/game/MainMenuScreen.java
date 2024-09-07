@@ -18,6 +18,7 @@ public class MainMenuScreen extends AbstractScreen {
     private Texture obst2p;
     private Texture obst2;
     private Texture bonus;
+    private Texture intro;
 
     private Rectangle playButtonBounds;
     private Rectangle objectBounds;
@@ -29,6 +30,7 @@ public class MainMenuScreen extends AbstractScreen {
     private Rectangle exitButtonBounds;
     private Rectangle gameworldbounds;
     private Rectangle mainImagebounds;
+    private Rectangle introBounds;
     private SpriteBatch batch;
 
     public MainMenuScreen(SoaringAdventure game) {
@@ -44,11 +46,12 @@ public class MainMenuScreen extends AbstractScreen {
         obst2=new Texture("obstacle2.png");
         obst2p=new Texture("obstacle2.png");
         bonus=new Texture("bonus.png");
+        intro=new Texture("introImg.png");
 
         float buttonWidth = 300;
         float buttonHeight = 300;
-        playButtonBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2, Gdx.graphics.getHeight() / 2 - 200, buttonWidth, buttonHeight);
-        exitButtonBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2, Gdx.graphics.getHeight() / 2 - 450, buttonWidth-30 , buttonHeight-30 );
+        playButtonBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2-40, Gdx.graphics.getHeight() / 2 - 300, buttonWidth, buttonHeight);
+        exitButtonBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2-250, Gdx.graphics.getHeight() / 2 - 370, buttonWidth-100 , buttonHeight-200 );
         gameworldbounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2, Gdx.graphics.getHeight() / 2 + 200, buttonWidth, buttonHeight);
         mainImagebounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth - 400) / 2, Gdx.graphics.getHeight() / 2 - 50, buttonWidth + 500, buttonHeight + 150);
         objectBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2-450, Gdx.graphics.getHeight() / 2-200, buttonWidth, buttonHeight-170);
@@ -56,6 +59,7 @@ public class MainMenuScreen extends AbstractScreen {
         obst2Bounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2+550, Gdx.graphics.getHeight() / 2+170 , buttonWidth-240, buttonHeight-240);
         obst2pBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2+650, Gdx.graphics.getHeight() / 2+130 , buttonWidth-240, buttonHeight-240);
         bonusBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2+600, Gdx.graphics.getHeight() / 2+40 , buttonWidth-220, buttonHeight-220);
+        introBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2+250, Gdx.graphics.getHeight() / 2-370 , buttonWidth+50, buttonHeight-200);
     }
 
     @Override
@@ -75,6 +79,8 @@ public class MainMenuScreen extends AbstractScreen {
         batch.draw(obst2, obst2Bounds.x, obst2Bounds.y, obst2Bounds.width, obst2Bounds.height);
         batch.draw(obst2p, obst2pBounds.x, obst2pBounds.y, obst2pBounds.width, obst2pBounds.height);
         batch.draw(bonus, bonusBounds.x, bonusBounds.y, bonusBounds.width, bonusBounds.height);
+        batch.draw(intro, introBounds.x, introBounds.y, introBounds.width, introBounds.height);
+
         batch.end();
 
         if (Gdx.input.isTouched()) {
@@ -103,5 +109,6 @@ public class MainMenuScreen extends AbstractScreen {
         obst2.dispose();
         obst2p.dispose();
         background.dispose();
+        intro.dispose();
     }
 }

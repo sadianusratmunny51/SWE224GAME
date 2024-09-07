@@ -12,7 +12,8 @@ public class BonusItem extends GameObject {
         batch.draw(texture, x, y, width, height);
     }
 
-    public void update(float delta) {
+    public void update(float delta,float b) {
+        if(b==0)x=0;
         x -= 200 * delta; // Example movement: Move to the left
     }
 }

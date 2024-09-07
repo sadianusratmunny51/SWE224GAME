@@ -237,15 +237,22 @@ public class GameScreen2 extends AbstractScreen {
         }
     }
     private void spawnCoins(float delta) {
-         timeSinceLastSpawnCoins += delta;
+        timeSinceLastSpawnCoins += delta;
 
         if (timeSinceLastSpawnCoins >= 3.0f && (coins.isEmpty() || timeSinceLastSpawnCoins >= 1.5f)) {
             float coinX = Gdx.graphics.getWidth();
-            float coinY = random.nextFloat() * (Gdx.graphics.getHeight() * 0.75f) + Gdx.graphics.getHeight() * 0.25f;
+
+            // Define the height of the red borders (top and bottom).
+            float upperBorderY = Gdx.graphics.getHeight() - 5; // top red border height
+            float lowerBorderY = Gdx.graphics.getHeight() * 0.25f; // bottom red border height
+
+            // Ensure that the coin Y position is between the bottom and top borders.
+            float coinY = random.nextFloat() * (upperBorderY - lowerBorderY - 40) + lowerBorderY; // Adjusted Y range
+
             float coinWidth = 40;
             float coinHeight = 40;
 
-            // Spawn multiple coins in a row
+            // Spawn multiple coins in a row.
             for (int i = 0; i < COINS_IN_ROW; i++) {
                 Coins coin = new Coins(coinsTexture[0], coinX + i * (coinWidth + COIN_SPACING), coinY, coinWidth, coinHeight, COIN_SPEED);
                 coins.add(coin);
@@ -350,7 +357,7 @@ public class GameScreen2 extends AbstractScreen {
 
         while (((Iterator<?>) obstacleIterator).hasNext()) {
             Obstacle obstacle = obstacleIterator.next();
-            obstacle.update(delta);
+            obstacle.update(delta,backgroundSpeed);
 
             // Check collision with obstacle1
             if (obstacle.getTexture() == obstacleTextures[0] && checkCollision(movingObject, obstacle)) {
@@ -384,7 +391,7 @@ public class GameScreen2 extends AbstractScreen {
 
     private void updateBonusItems(float delta) {
         for (BonusItem bonusItem : bonusItems) {
-            bonusItem.update(delta);
+            bonusItem.update(delta,backgroundSpeed);
 
             if (checkCollision(movingObject, bonusItem)) {
                 score += 500;
