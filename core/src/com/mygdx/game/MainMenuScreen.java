@@ -91,6 +91,9 @@ public class MainMenuScreen extends AbstractScreen {
             if (exitButtonBounds.contains(touchPos)) {
                 Gdx.app.exit();
             }
+            if(introBounds.contains(touchPos)){
+                game.setScreen(new Introduction(game));
+            }
         }
     }
 
