@@ -2,6 +2,7 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -59,7 +60,11 @@ public class GameScreen2 extends AbstractScreen {
     private static final int COINS_IN_ROW = 5;
     private static final float COIN_SPACING = 10.0f;
     private static final float COIN_SPEED = 200.0f;
-
+    private Sound bonusSoundEffect;
+    private  Sound backSound;
+    private  Sound hitSound;
+    private Sound coinSound;
+    private Sound end;
 
     public GameScreen2(SoaringAdventure game) {
         super(game);
@@ -115,11 +120,19 @@ public class GameScreen2 extends AbstractScreen {
         shapeRenderer = new ShapeRenderer();
 
         isGameOver = false;
+        bonusSoundEffect = Gdx.audio.newSound(Gdx.files.internal("bonus (2).mp3"));
+        hitSound=Gdx.audio.newSound(Gdx.files.internal("hit.mp3"));
+        coinSound=Gdx.audio.newSound(Gdx.files.internal("coin.mp3"));
+        end=Gdx.audio.newSound(Gdx.files.internal("End.mp3"));
+
 
     }
 
     @Override
-    public void show() {}
+    public void show() {
+        backSound = Gdx.audio.newSound(Gdx.files.internal("backSound.mp3"));
+        backSound.play();
+    }
 
     @Override
     public void render(float delta) {
@@ -361,6 +374,7 @@ public class GameScreen2 extends AbstractScreen {
 
             // Check collision with obstacle1
             if (obstacle.getTexture() == obstacleTextures[0] && checkCollision(movingObject, obstacle)) {
+                end.play();
                 isGameOver = true;
                 font.getData().setScale(2.0f);
                 break;
@@ -368,6 +382,7 @@ public class GameScreen2 extends AbstractScreen {
 
             // Check collision with obstacle2
             if (obstacle.getTexture() == obstacleTextures[1] && checkCollision(movingObject, obstacle)) {
+                hitSound.play();
                 score = Math.max(0, score - 50);
                 addTemporaryMessage("-50", movingObject.getPosition().x + movingObject.getWidth() / 2, movingObject.getPosition().y + movingObject.getHeight() / 2, 1.0f);
                 isGameOver = false;
@@ -394,6 +409,7 @@ public class GameScreen2 extends AbstractScreen {
             bonusItem.update(delta,backgroundSpeed);
 
             if (checkCollision(movingObject, bonusItem)) {
+                bonusSoundEffect.play();
                 score += 500;
                 addTemporaryMessage("+500", movingObject.getPosition().x + movingObject.getWidth() / 2, movingObject.getPosition().y + movingObject.getHeight() / 2, 1.0f);
                 bonusItems.remove(bonusItem);
@@ -414,6 +430,7 @@ public class GameScreen2 extends AbstractScreen {
             }
 
             if (movingObject.overlaps(coin)) {
+                coinSound.play();
                 coinCount++;
                 coinIterator.remove();
 //                TemporaryMessage message = new TemporaryMessage("+1 Coin", 2.0f, coin.getX(), coin.getY());
@@ -456,7 +473,9 @@ public class GameScreen2 extends AbstractScreen {
     public void resume() {}
 
     @Override
-    public void hide() {}
+    public void hide() {
+        backSound.stop();
+    }
 
     @Override
     public void dispose() {
@@ -473,5 +492,10 @@ public class GameScreen2 extends AbstractScreen {
 
         bonusTexture.dispose();
         font.dispose();
+        bonusSoundEffect.dispose();
+        backSound.dispose();
+        hitSound.dispose();
+        coinSound.dispose();
+        end.dispose();
     }
 }

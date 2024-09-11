@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
+import com.badlogic.gdx.audio.Sound;
 
 public class GameScreen extends AbstractScreen {
     private SpriteBatch batch;
@@ -56,7 +57,11 @@ public class GameScreen extends AbstractScreen {
     private boolean bagCollected = false;  // Flag to track if the bag was collected
     private float bagCollectedTimer = 0;
     private boolean gamePaused = false;
-
+    private Sound bonusSoundEffect;
+    private Sound backSound;
+    private  Sound hitSound;
+    private Sound levelWin;
+    private Sound end;
     public GameScreen(SoaringAdventure game) {
         super(game);
         messages = new ArrayList<>();
@@ -106,11 +111,19 @@ public class GameScreen extends AbstractScreen {
         isGameOver = false;
         bag = null;
         isBagSpawned = false;
+        bonusSoundEffect = Gdx.audio.newSound(Gdx.files.internal("bonus (2).mp3"));
+        hitSound= Gdx.audio.newSound(Gdx.files.internal("hit.mp3"));
+        levelWin=Gdx.audio.newSound(Gdx.files.internal("level-win.mp3"));
+        end=Gdx.audio.newSound(Gdx.files.internal("End.mp3"));
 
     }
 
     @Override
-    public void show() {}
+    public void show() {
+        // Load and play the sound when the screen is first shown
+        backSound = Gdx.audio.newSound(Gdx.files.internal("backSound.mp3"));
+        backSound.play();  // This will play the sound once when the menu screen appears
+    }
 
     @Override
     public void render(float delta) {
@@ -144,7 +157,7 @@ public class GameScreen extends AbstractScreen {
 
 
                 if (bag.overlaps(movingObject)) {
-
+                    levelWin.play();
                     addTemporaryMessage("Woh! Bag Collected", movingObject.getPosition().x + movingObject.getWidth()+200 / 2, movingObject.getPosition().y + movingObject.getHeight() / 2, 4.0f);
                     bagCollected = true;
                     bagCollectedTimer = 0;
@@ -360,6 +373,7 @@ public class GameScreen extends AbstractScreen {
 
             // Check collision with obstacle1
             if (obstacle.getTexture() == obstacleTextures[0] && checkCollision(movingObject, obstacle)) {
+                end.play();
                 isGameOver = true;
                 font.getData().setScale(2.0f);
                 break;
@@ -367,6 +381,7 @@ public class GameScreen extends AbstractScreen {
 
             // Check collision with obstacle2
             if (obstacle.getTexture() == obstacleTextures[1] && checkCollision(movingObject, obstacle)) {
+                hitSound.play();
                 score = Math.max(0, score - 50);
                 addTemporaryMessage("-50", movingObject.getPosition().x + movingObject.getWidth() / 2, movingObject.getPosition().y + movingObject.getHeight() / 2, 1.0f);
                 isGameOver = false;
@@ -393,6 +408,7 @@ public class GameScreen extends AbstractScreen {
             bonusItem.update(delta,backgroundSpeed);
 
             if (checkCollision(movingObject, bonusItem)) {
+                bonusSoundEffect.play();
                 score += 500;
                 addTemporaryMessage("+500", movingObject.getPosition().x + movingObject.getWidth() / 2, movingObject.getPosition().y + movingObject.getHeight() / 2, 1.0f);
                 bonusItems.remove(bonusItem);
@@ -433,7 +449,10 @@ public class GameScreen extends AbstractScreen {
     public void resume() {}
 
     @Override
-    public void hide() {}
+    public void hide() {
+        // Stop the sound when leaving the screen
+        backSound.stop();
+    }
 
     @Override
     public void dispose() {
@@ -446,5 +465,10 @@ public class GameScreen extends AbstractScreen {
         }
         bonusTexture.dispose();
         font.dispose();
+        bonusSoundEffect.dispose();
+        backSound.dispose();
+        hitSound.dispose();
+        levelWin.dispose();
+        end.dispose();
     }
 }

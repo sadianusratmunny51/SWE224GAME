@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.audio.Sound;
 
 public class MainMenuScreen extends AbstractScreen {
     private Texture playButton;
@@ -25,13 +26,14 @@ public class MainMenuScreen extends AbstractScreen {
     private Rectangle obst1Bounds;
     private Rectangle obst2pBounds;
     private Rectangle obst2Bounds;
-
     private Rectangle bonusBounds;
     private Rectangle exitButtonBounds;
     private Rectangle gameworldbounds;
     private Rectangle mainImagebounds;
     private Rectangle introBounds;
+
     private SpriteBatch batch;
+    private Sound jumpSound;
 
     public MainMenuScreen(SoaringAdventure game) {
         super(game);
@@ -41,33 +43,37 @@ public class MainMenuScreen extends AbstractScreen {
         gameworld = new Texture("gameworld.png");
         mainImage = new Texture("mainImage.png");
         background = new Texture("mainScreenBackground.jpg");
-        object=new Texture("object1.png");
-        obst1=new Texture("obstacle1.png");
-        obst2=new Texture("obstacle2.png");
-        obst2p=new Texture("obstacle2.png");
-        bonus=new Texture("bonus.png");
-        intro=new Texture("introImg.png");
+        object = new Texture("object1.png");
+        obst1 = new Texture("obstacle1.png");
+        obst2 = new Texture("obstacle2.png");
+        obst2p = new Texture("obstacle2.png");
+        bonus = new Texture("bonus.png");
+        intro = new Texture("introImg.png");
 
         float buttonWidth = 300;
         float buttonHeight = 300;
-        playButtonBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2-40, Gdx.graphics.getHeight() / 2 - 300, buttonWidth, buttonHeight);
-        exitButtonBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2-250, Gdx.graphics.getHeight() / 2 - 370, buttonWidth-100 , buttonHeight-200 );
+        playButtonBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 - 40, Gdx.graphics.getHeight() / 2 - 300, buttonWidth, buttonHeight);
+        exitButtonBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 - 250, Gdx.graphics.getHeight() / 2 - 370, buttonWidth - 100, buttonHeight - 200);
         gameworldbounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2, Gdx.graphics.getHeight() / 2 + 200, buttonWidth, buttonHeight);
         mainImagebounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth - 400) / 2, Gdx.graphics.getHeight() / 2 - 50, buttonWidth + 500, buttonHeight + 150);
-        objectBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2-450, Gdx.graphics.getHeight() / 2-200, buttonWidth, buttonHeight-170);
-        obst1Bounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2+600, Gdx.graphics.getHeight() / 2+220 , buttonWidth-200, buttonHeight-200);
-        obst2Bounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2+550, Gdx.graphics.getHeight() / 2+170 , buttonWidth-240, buttonHeight-240);
-        obst2pBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2+650, Gdx.graphics.getHeight() / 2+130 , buttonWidth-240, buttonHeight-240);
-        bonusBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2+600, Gdx.graphics.getHeight() / 2+40 , buttonWidth-220, buttonHeight-220);
-        introBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2+250, Gdx.graphics.getHeight() / 2-370 , buttonWidth+50, buttonHeight-200);
+        objectBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 - 450, Gdx.graphics.getHeight() / 2 - 200, buttonWidth, buttonHeight - 170);
+        obst1Bounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 + 600, Gdx.graphics.getHeight() / 2 + 220, buttonWidth - 200, buttonHeight - 200);
+        obst2Bounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 + 550, Gdx.graphics.getHeight() / 2 + 170, buttonWidth - 240, buttonHeight - 240);
+        obst2pBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 + 650, Gdx.graphics.getHeight() / 2 + 130, buttonWidth - 240, buttonHeight - 240);
+        bonusBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 + 600, Gdx.graphics.getHeight() / 2 + 40, buttonWidth - 220, buttonHeight - 220);
+        introBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 + 250, Gdx.graphics.getHeight() / 2 - 370, buttonWidth + 50, buttonHeight - 200);
     }
 
     @Override
-    public void show() {}
+    public void show() {
+        // Load and play the sound when the screen is first shown
+        jumpSound = Gdx.audio.newSound(Gdx.files.internal("mixkit-percussions-01-733.mp3"));
+        jumpSound.play();  // This will play the sound once when the menu screen appears
+    }
 
     @Override
     public void render(float delta) {
-        // ScreenUtils.clear(0, 0, 0, 1);
+        // Clear the screen and render all elements
         batch.begin();
         batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch.draw(playButton, playButtonBounds.x, playButtonBounds.y, playButtonBounds.width, playButtonBounds.height);
@@ -80,28 +86,32 @@ public class MainMenuScreen extends AbstractScreen {
         batch.draw(obst2p, obst2pBounds.x, obst2pBounds.y, obst2pBounds.width, obst2pBounds.height);
         batch.draw(bonus, bonusBounds.x, bonusBounds.y, bonusBounds.width, bonusBounds.height);
         batch.draw(intro, introBounds.x, introBounds.y, introBounds.width, introBounds.height);
-
         batch.end();
 
+        // Handle touch input for button interactions
         if (Gdx.input.isTouched()) {
             Vector2 touchPos = new Vector2(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
             if (playButtonBounds.contains(touchPos)) {
-                game.setScreen(new GameScreen(game));
+                game.setScreen(new GameScreen(game));  // Go to the game screen
             }
             if (exitButtonBounds.contains(touchPos)) {
-                Gdx.app.exit();
+                Gdx.app.exit();  // Exit the game
             }
-            if(introBounds.contains(touchPos)){
-                game.setScreen(new Introduction(game));
+            if (introBounds.contains(touchPos)) {
+                game.setScreen(new Introduction(game));  // Go to the introduction screen
             }
         }
     }
 
     @Override
-    public void hide() {}
+    public void hide() {
+        // Stop the sound when leaving the screen
+        jumpSound.stop();
+    }
 
     @Override
     public void dispose() {
+        // Dispose of resources when the screen is destroyed
         batch.dispose();
         playButton.dispose();
         exitButton.dispose();
@@ -113,5 +123,6 @@ public class MainMenuScreen extends AbstractScreen {
         obst2p.dispose();
         background.dispose();
         intro.dispose();
+        jumpSound.dispose();  // Properly dispose of the sound
     }
 }
