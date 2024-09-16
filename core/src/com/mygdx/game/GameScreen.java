@@ -8,22 +8,28 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
 import com.badlogic.gdx.audio.Sound;
 
+
 public class GameScreen extends AbstractScreen {
     private SpriteBatch batch;
     private Texture background;
     private Texture background2;
+    private Texture p,me,ps,r;
+    private Rectangle pBounds,meBounds,psBounds,rBounds;
+
     private float backgroundX;
     private float backgroundX2;
     private float backgroundSpeed;
 
     private MovingObject movingObject;
-   // private Texture bag;
+    // private Texture bag;
     private ArrayList<Obstacle> obstacles;
     private ArrayList<BonusItem> bonusItems;
 
@@ -54,7 +60,7 @@ public class GameScreen extends AbstractScreen {
     private float timeSinceGameOver = 0f;
     private Bag bag;
     private boolean isBagSpawned;
-    private boolean bagCollected = false;  // Flag to track if the bag was collected
+    private boolean bagCollected = false;
     private float bagCollectedTimer = 0;
     private boolean gamePaused = false;
     private Sound bonusSoundEffect;
@@ -62,12 +68,18 @@ public class GameScreen extends AbstractScreen {
     private  Sound hitSound;
     private Sound levelWin;
     private Sound end;
+    private Sound click;
+
     public GameScreen(SoaringAdventure game) {
         super(game);
         messages = new ArrayList<>();
         batch = new SpriteBatch();
         background = new Texture("background.png");
         background2 = new Texture("background.png");
+        p=new Texture("pppp.png");
+        ps=new Texture("pause.png");
+        me=new Texture("menu.png");
+        r=new Texture("restart.png");
         backgroundX = 0;
         backgroundX2 = background.getWidth();
         backgroundSpeed = 600;
@@ -94,7 +106,13 @@ public class GameScreen extends AbstractScreen {
         };
 
         bonusTexture = new Texture("bonus.png");
-       // bag=new Texture("bag.png");
+        // bag=new Texture("bag.png");
+        float width=200;
+        float height=60;
+        psBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2-400, Gdx.graphics.getHeight() / 2 -390, width, height);
+        pBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2-150, Gdx.graphics.getHeight() / 2 -390, width, height);
+        meBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2+100, Gdx.graphics.getHeight() / 2 -390, width, height);
+        rBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2+350, Gdx.graphics.getHeight() / 2 -390, width, height);
 
         timeSinceLastSpawnObstacle1 = 0;
         timeSinceLastSpawnObstacle2 = 0;
@@ -115,20 +133,25 @@ public class GameScreen extends AbstractScreen {
         hitSound= Gdx.audio.newSound(Gdx.files.internal("hit.mp3"));
         levelWin=Gdx.audio.newSound(Gdx.files.internal("level-win.mp3"));
         end=Gdx.audio.newSound(Gdx.files.internal("End.mp3"));
+        click=Gdx.audio.newSound(Gdx.files.internal("click.wav"));
 
     }
 
     @Override
     public void show() {
-        // Load and play the sound when the screen is first shown
-        backSound = Gdx.audio.newSound(Gdx.files.internal("backSound.mp3"));
-        backSound.play();  // This will play the sound once when the menu screen appears
+
+        backSound = Gdx.audio.newSound(Gdx.files.internal("nature.mp3"));
+        backSound.play();
     }
 
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 1, 1);
 
+        if (gamePaused) {
+            renderPaused();
+            return;
+        }
         backgroundX -= backgroundSpeed * Gdx.graphics.getDeltaTime();
         backgroundX2 -= backgroundSpeed * Gdx.graphics.getDeltaTime();
 
@@ -158,12 +181,14 @@ public class GameScreen extends AbstractScreen {
 
                 if (bag.overlaps(movingObject)) {
                     levelWin.play();
+                    gamePaused=false;
                     addTemporaryMessage("Woh! Bag Collected", movingObject.getPosition().x + movingObject.getWidth()+200 / 2, movingObject.getPosition().y + movingObject.getHeight() / 2, 4.0f);
                     bagCollected = true;
                     bagCollectedTimer = 0;
-                   // bag = null;
+                    // bag = null;
                     isBagSpawned =true;
                     backgroundSpeed=0;
+                    gamePaused=false;
 
 
 
@@ -180,16 +205,40 @@ public class GameScreen extends AbstractScreen {
 
 
             bagCollectedTimer += delta;
-            gamePaused = true;
+            gamePaused = false;
 
             if (bagCollectedTimer >= 4.0) {
                 game.setScreen(new Level2Screen(game));
             }
         }
+
+
         batch.begin();
+
 
         batch.draw(background, backgroundX, 0, background.getWidth(), Gdx.graphics.getHeight());
         batch.draw(background2,backgroundX2, 0, background2.getWidth(), Gdx.graphics.getHeight());
+        Vector2 touchPos = new Vector2(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
+        if (pBounds.contains(touchPos)) {
+            batch.draw(p, pBounds.x - 10, pBounds.y - 10, pBounds.width + 10, pBounds.height + 10);
+        } else {
+            batch.draw(p, pBounds.x, pBounds.y, pBounds.width, pBounds.height);
+        }
+        if (meBounds.contains(touchPos)) {
+            batch.draw(me, meBounds.x - 10, meBounds.y - 10, meBounds.width + 10, meBounds.height + 10);
+        } else {
+            batch.draw(me, meBounds.x, meBounds.y, meBounds.width, meBounds.height);
+        }
+        if (psBounds.contains(touchPos)) {
+            batch.draw(ps, psBounds.x - 10, psBounds.y - 10, psBounds.width + 10, psBounds.height + 10);
+        } else {
+            batch.draw(ps, psBounds.x, psBounds.y, psBounds.width, psBounds.height);
+        }
+        if (rBounds.contains(touchPos)) {
+            batch.draw(r, rBounds.x - 10, rBounds.y - 10, rBounds.width + 10, rBounds.height + 10);
+        } else {
+            batch.draw(r, rBounds.x, rBounds.y, rBounds.width, rBounds.height);        }
+
 
         movingObject.render(batch);
 
@@ -250,8 +299,75 @@ public class GameScreen extends AbstractScreen {
         for (TemporaryMessage message : messages) {
             message.update(delta);
         }
+        if (Gdx.input.isTouched()) {
+            // Vector2 touchPos = new Vector2(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
+
+            if (meBounds.contains(touchPos)) {
+                click.play();
+                game.setScreen(new MainMenuScreen(game));
+            }
+            if (rBounds.contains(touchPos)) {
+                click.play();
+                game.setScreen(new GameScreen(game));
+            }
+            if (Gdx.input.isTouched() && psBounds.contains(touchPos)) {
+                click.play();
+                gamePaused = !gamePaused;
+            }
+
+        }
 
     }
+    private void renderPaused() {
+        batch.begin();
+        batch.draw(background, backgroundX, 0, background.getWidth(), Gdx.graphics.getHeight());
+        batch.draw(background2, backgroundX2, 0, background2.getWidth(), Gdx.graphics.getHeight());
+
+        String pausedText = "Game Paused";
+        layout.setText(font, pausedText);
+        font.draw(batch, pausedText, (Gdx.graphics.getWidth() - layout.width) / 2, (Gdx.graphics.getHeight() + layout.height) / 2);
+
+        Vector2 touchPos = new Vector2(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
+        //Vector2 touchPos2 = new Vector2(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
+
+        if (pBounds.contains(touchPos)) {
+            batch.draw(p, pBounds.x - 10, pBounds.y - 10, pBounds.width + 10, pBounds.height + 10);
+        } else {
+            batch.draw(p, pBounds.x, pBounds.y, pBounds.width, pBounds.height);
+        }
+        if (rBounds.contains(touchPos)) {
+            batch.draw(r, rBounds.x - 10, rBounds.y - 10, rBounds.width + 10, rBounds.height + 10);
+        } else {
+            batch.draw(r, rBounds.x, rBounds.y, rBounds.width, rBounds.height);
+        }
+        if (meBounds.contains(touchPos)) {
+            batch.draw(me, meBounds.x - 10, meBounds.y - 10, meBounds.width + 10, meBounds.height + 10);
+        } else {
+            batch.draw(me, meBounds.x, meBounds.y, meBounds.width, meBounds.height);
+        }
+
+
+        batch.end();
+        if (Gdx.input.isTouched()) {
+
+            if (Gdx.input.isTouched() && pBounds.contains(touchPos)) {
+                click.play();
+                gamePaused = false;
+            }
+
+            if (meBounds.contains(touchPos)) {
+                click.play();
+                game.setScreen(new MainMenuScreen(game));
+            }
+            if (rBounds.contains(touchPos)) {
+                click.play();
+                game.setScreen(new GameScreen(game));
+            }
+        }
+    }
+
+
+
 
     private void handleInput(float delta) {
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
@@ -289,6 +405,7 @@ public class GameScreen extends AbstractScreen {
             timeSinceLastSpawnObstacle2 = 0;
         }
     }
+
 
     private void spawnobject(Texture obstacleTexture){
         boolean validPosition =false;
@@ -450,7 +567,7 @@ public class GameScreen extends AbstractScreen {
 
     @Override
     public void hide() {
-        // Stop the sound when leaving the screen
+
         backSound.stop();
     }
 
@@ -470,5 +587,10 @@ public class GameScreen extends AbstractScreen {
         hitSound.dispose();
         levelWin.dispose();
         end.dispose();
+        p.dispose();
+        ps.dispose();
+        me.dispose();
+        r.dispose();
+
     }
 }

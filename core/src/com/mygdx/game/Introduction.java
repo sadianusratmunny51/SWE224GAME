@@ -42,14 +42,27 @@ public class Introduction extends AbstractScreen{
         batch.begin();
 
         batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        batch.draw(helpButton, helpButtonBounds.x, helpButtonBounds.y, helpButtonBounds.width, helpButtonBounds.height);
-        batch.draw(backButton, backButtonBounds.x, backButtonBounds.y, backButtonBounds.width, backButtonBounds.height);
+        Vector2 touchPos = new Vector2(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
+
+        if (helpButtonBounds.contains(touchPos)) {
+            batch.draw(helpButton, helpButtonBounds.x - 10, helpButtonBounds.y - 10, helpButtonBounds.width + 10, helpButtonBounds.height + 10);
+        } else {
+            batch.draw(helpButton, helpButtonBounds.x, helpButtonBounds.y, helpButtonBounds.width, helpButtonBounds.height);
+        }
+        if (backButtonBounds.contains(touchPos)) {
+            batch.draw(backButton, backButtonBounds.x - 10, backButtonBounds.y - 10, backButtonBounds.width + 10, backButtonBounds.height + 10);
+        } else {
+            batch.draw(backButton, backButtonBounds.x, backButtonBounds.y, backButtonBounds.width, backButtonBounds.height);
+        }
+
+        //batch.draw(helpButton, helpButtonBounds.x, helpButtonBounds.y, helpButtonBounds.width, helpButtonBounds.height);
+       // batch.draw(backButton, backButtonBounds.x, backButtonBounds.y, backButtonBounds.width, backButtonBounds.height);
         batch.draw(sentence, sentenceBounds.x, sentenceBounds.y, sentenceBounds.width, sentenceBounds.height);
 
 
         batch.end();
         if (Gdx.input.isTouched()) {
-            Vector2 touchPos = new Vector2(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
+           // Vector2 touchPos = new Vector2(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
             if (helpButtonBounds.contains(touchPos)) {
                 game.setScreen(new HelpScreen(game));
             }

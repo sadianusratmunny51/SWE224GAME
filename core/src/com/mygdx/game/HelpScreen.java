@@ -46,8 +46,15 @@ public class HelpScreen extends AbstractScreen {
     @Override
     public void render(float delta) {
         batch.begin();
+        Vector2 touchPos = new Vector2(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
+
         batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        batch.draw(ok, okBounds.x, okBounds.y, okBounds.width, okBounds.height);
+        if (okBounds.contains(touchPos)) {
+            batch.draw(ok, okBounds.x - 10, okBounds.y - 10, okBounds.width + 10, okBounds.height + 10);
+        } else {
+            batch.draw(ok, okBounds.x, okBounds.y, okBounds.width, okBounds.height);
+        }
+       // batch.draw(ok, okBounds.x, okBounds.y, okBounds.width, okBounds.height);
         batch.end();
     }
 

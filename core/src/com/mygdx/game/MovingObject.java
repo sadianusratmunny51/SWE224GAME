@@ -10,7 +10,7 @@ public class MovingObject extends GameObject {
     private float scale;
 
     public MovingObject(Texture texture, float screenWidth, float screenHeight, float speed, float scale) {
-        super((screenWidth / 4 -150) - texture.getWidth() * scale / 4, screenHeight / 2 - texture.getHeight() * scale / 2,
+        super((screenWidth / 4 - 150) - texture.getWidth() * scale / 4, screenHeight / 2 - texture.getHeight() * scale / 2,
                 texture.getWidth() * scale, texture.getHeight() * scale, texture);
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
@@ -19,12 +19,14 @@ public class MovingObject extends GameObject {
     }
 
     public void update(float delta) {
-        // Update object position or state here if necessary
+        // Optionally, add logic to automatically update or move the object
     }
+
     public boolean overlaps(GameObject other) {
-        Rectangle obstacleRect = new Rectangle(x, y, width, height);
+        // Use libGDX's rectangle for accurate collision detection
+        Rectangle objectRect = new Rectangle(x, y, width, height);
         Rectangle otherRect = new Rectangle(other.getX(), other.getY(), other.getWidth(), other.getHeight());
-        return obstacleRect.overlaps(otherRect);
+        return objectRect.overlaps(otherRect);
     }
 
     public void render(SpriteBatch batch) {
@@ -47,4 +49,8 @@ public class MovingObject extends GameObject {
         y = Math.max(0, y - speed * delta);
     }
 
+    // Optionally, you can add a method to increase or change speed dynamically
+    public void setSpeed(float newSpeed) {
+        this.speed = newSpeed;
+    }
 }
