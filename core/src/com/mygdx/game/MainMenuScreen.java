@@ -10,8 +10,15 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.math.MathUtils;
+
+import java.lang.reflect.Parameter;
 
 public class MainMenuScreen extends AbstractScreen {
+    private Texture starTexture;
+    private Vector2[] starPositions;
+    private float[] starSpeeds;
+    private int numStars = 50;
     private Texture playButton;
     private Texture exitButton;
     private Texture gameworld;
@@ -42,19 +49,25 @@ public class MainMenuScreen extends AbstractScreen {
     private Sound jumpSound;
     private BitmapFont customFont;
     private BitmapFont textFont;
+    private BitmapFont soaringTextFont;
 
-    private float elapsedTime = 0f;  // controlling the delay in letter display
+    private float elapsedTime = 0f;
     private float elapsedTime1 = 0f;
     private String fullText = "Explore The Nature";
     private String text1="Break The Limits";
+    private String soaringText="Soaring  Adventure";
     private StringBuilder displayedText = new StringBuilder();
     private StringBuilder displayedText1=new StringBuilder();
+    private StringBuilder displayedTextSoaring=new StringBuilder();
     private float letterDelay = 0.2f;
+    private float letterDelaySoaring=0.5f;
+    float elapsedTimeSoaring;
 
     private float fallingSpeed = 100;
     private Rectangle[] fallingCoinBounds = new Rectangle[4];
     private boolean[] hasCollided = new boolean[4];
     private Sound click;
+
 
     public MainMenuScreen(SoaringAdventure game) {
         super(game);
@@ -62,8 +75,8 @@ public class MainMenuScreen extends AbstractScreen {
         playButton = new Texture("playButton.png");
         exitButton = new Texture("exit1.png");
         gameworld = new Texture("gameworld.png");
-        mainImage = new Texture("mainImage.png");
-        background = new Texture("mainScreenBackground.jpg");
+      //  mainImage = new Texture("mainImage.png");
+        background = new Texture("front.png");
         object = new Texture("object1.png");
         obst1 = new Texture("obstacle1.png");
         obst2 = new Texture("obstacle2.png");
@@ -78,13 +91,13 @@ public class MainMenuScreen extends AbstractScreen {
         playButtonBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2, Gdx.graphics.getHeight() / 2 -100, buttonWidth, buttonHeight-230);
         exitButtonBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2, Gdx.graphics.getHeight() / 2 - 200, buttonWidth , buttonHeight - 230);
         gameworldbounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2, Gdx.graphics.getHeight() / 2 + 200, buttonWidth, buttonHeight);
-        mainImagebounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth - 400) / 2, Gdx.graphics.getHeight() / 2 - 50, buttonWidth + 500, buttonHeight + 150);
+        //mainImagebounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth - 400) / 2, Gdx.graphics.getHeight() / 2 - 50, buttonWidth + 500, buttonHeight + 150);
         objectBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 - 450, Gdx.graphics.getHeight() / 2 - 200, buttonWidth, buttonHeight - 170);
         obst1Bounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 + 600, Gdx.graphics.getHeight() / 2 + 220, buttonWidth - 200, buttonHeight - 200);
         obst2Bounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 + 550, Gdx.graphics.getHeight() / 2 + 170, buttonWidth - 240, buttonHeight - 240);
         obst2pBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 + 650, Gdx.graphics.getHeight() / 2 + 130, buttonWidth - 240, buttonHeight - 240);
         bonusBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 + 600, Gdx.graphics.getHeight() / 2 + 40, buttonWidth - 220, buttonHeight - 220);
-        goldCoinBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 + 700, Gdx.graphics.getHeight() / 2 -40, buttonWidth - 200, buttonHeight - 200);
+        goldCoinBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 - 480, Gdx.graphics.getHeight() / 2 -90, buttonWidth - 200, buttonHeight - 200);
         //goldCoinBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 + 700,
         introBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2, Gdx.graphics.getHeight() / 2 - 300, buttonWidth , buttonHeight - 230);
         for (int i = 0; i < fallingCoinBounds.length; i++) {
@@ -94,22 +107,41 @@ public class MainMenuScreen extends AbstractScreen {
                     goldCoinBounds.width - 50,
                     goldCoinBounds.height - 50
             );
-            hasCollided[i] = false;  // No collisions at the start
+            hasCollided[i] = false;
         }
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Myttf.ttf"));
         FreeTypeFontGenerator generator1 = new FreeTypeFontGenerator(Gdx.files.internal("ttf22.ttf"));
+        FreeTypeFontGenerator generatorSoaring = new FreeTypeFontGenerator(Gdx.files.internal("soaring1.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         FreeTypeFontGenerator.FreeTypeFontParameter parameter1 = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        FreeTypeFontGenerator.FreeTypeFontParameter parameterSoaring = new FreeTypeFontGenerator.FreeTypeFontParameter();
+
 
         parameter.size = 48;
         parameter1.size=48;
+        parameterSoaring.size=80;
         parameter.color= Color.BLACK;
-        parameter1.color=Color.BLACK;
+        parameter1.color=Color.GOLD;
+        parameterSoaring.color=Color.CHARTREUSE;
         customFont = generator.generateFont(parameter);
         textFont= generator1.generateFont(parameter1);
+        soaringTextFont=generatorSoaring.generateFont(parameterSoaring);
         generator.dispose();
         generator1.dispose();
+        generatorSoaring.dispose();
         click=Gdx.audio.newSound(Gdx.files.internal("click.wav"));
+        starTexture = new Texture("star1.png");
+
+
+        starPositions = new Vector2[numStars];
+        starSpeeds = new float[numStars];
+
+        for (int i = 0; i < numStars; i++) {
+            float x = MathUtils.random(0, Gdx.graphics.getWidth());
+            float y = MathUtils.random(0, Gdx.graphics.getHeight());
+            starPositions[i] = new Vector2(x, y);
+            starSpeeds[i] = MathUtils.random(20, 20);
+        }
     }
 
     @Override
@@ -124,6 +156,24 @@ public class MainMenuScreen extends AbstractScreen {
 
         batch.begin();
         batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+
+        for (int i = 0; i < numStars; i++) {
+
+            starPositions[i].x += starSpeeds[i] * delta;
+
+
+            if (starPositions[i].x > Gdx.graphics.getWidth()) {
+                starPositions[i].x = -starTexture.getWidth();
+                starPositions[i].y = MathUtils.random(0, Gdx.graphics.getHeight());
+            }
+
+            // Draw the star at its updated position
+            float starSize = MathUtils.random(10, 20);
+            batch.draw(starTexture, starPositions[i].x, starPositions[i].y, starSize, starSize);
+        }
+
+
         Vector2 touchPos = new Vector2(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
         if (playButtonBounds.contains(touchPos)) {
 
@@ -153,7 +203,7 @@ public class MainMenuScreen extends AbstractScreen {
 
        // batch.draw(exitButton, exitButtonBounds.x, exitButtonBounds.y, exitButtonBounds.width, exitButtonBounds.height);
         batch.draw(gameworld, gameworldbounds.x, gameworldbounds.y, gameworldbounds.width, gameworldbounds.height);
-        batch.draw(mainImage, mainImagebounds.x, mainImagebounds.y, mainImagebounds.width, mainImagebounds.height);
+       // batch.draw(mainImage, mainImagebounds.x, mainImagebounds.y, mainImagebounds.width, mainImagebounds.height);
         batch.draw(object, objectBounds.x, objectBounds.y, objectBounds.width, objectBounds.height);
         batch.draw(obst1, obst1Bounds.x, obst1Bounds.y, obst1Bounds.width, obst1Bounds.height);
         batch.draw(obst2, obst2Bounds.x, obst2Bounds.y, obst2Bounds.width, obst2Bounds.height);
@@ -180,13 +230,19 @@ public class MainMenuScreen extends AbstractScreen {
         int numLettersToShow = (int) (elapsedTime / letterDelay);
         elapsedTime1 += delta;
         int numLettersToShow1 = (int) (elapsedTime1 / letterDelay);
+        elapsedTime1 += delta;
+        int numLettersToShowSoaring = (int) (elapsedTime1 / letterDelaySoaring);
+         elapsedTimeSoaring += delta;
 
-        // Ensure we don't show more letters than are in the text
+
         if (numLettersToShow > fullText.length()) {
             numLettersToShow = fullText.length();
         }
         if (numLettersToShow1 > text1.length()) {
             numLettersToShow1 = text1.length();
+        }
+        if (numLettersToShowSoaring > soaringText.length()) {
+            numLettersToShowSoaring = soaringText.length();
         }
 
         // Update the displayed text based on the elapsed time
@@ -196,9 +252,15 @@ public class MainMenuScreen extends AbstractScreen {
         displayedText1.setLength(0);
         displayedText1.append(text1, 0, numLettersToShow1);
 
+        displayedTextSoaring.setLength(0);
+        displayedTextSoaring.append(soaringText, 0, numLettersToShowSoaring);
+
 
         customFont.draw(batch, displayedText.toString(), Gdx.graphics.getWidth() / 2-240, Gdx.graphics.getHeight()/2+140);
         textFont.draw(batch, displayedText1.toString(), Gdx.graphics.getWidth() / 2+150, Gdx.graphics.getHeight()/2+100);
+        soaringTextFont.draw(batch, displayedTextSoaring.toString(), Gdx.graphics.getWidth() / 2-400, Gdx.graphics.getHeight()/2+250);
+
+
 
         batch.end();
 
@@ -246,6 +308,7 @@ public class MainMenuScreen extends AbstractScreen {
         textFont.dispose();
         goldCoin.dispose();
         click.dispose();
+        starTexture.dispose();
 
     }
 }

@@ -208,7 +208,7 @@ public class GameScreen extends AbstractScreen {
             gamePaused = false;
 
             if (bagCollectedTimer >= 4.0) {
-                game.setScreen(new Level2Screen(game));
+                game.setScreen(new Level3Screen(game));
             }
         }
 
@@ -277,8 +277,8 @@ public class GameScreen extends AbstractScreen {
             }
 
         }
-        if (score >=1500) {
-            game.setScreen(new Level2Screen(game));
+        if (score >=10) {
+            game.setScreen(new Level3Screen(game));
         }
 
         for (TemporaryMessage message : messages) {
@@ -312,6 +312,7 @@ public class GameScreen extends AbstractScreen {
             }
             if (Gdx.input.isTouched() && psBounds.contains(touchPos)) {
                 click.play();
+                backSound.pause();
                 gamePaused = !gamePaused;
             }
 
@@ -352,6 +353,7 @@ public class GameScreen extends AbstractScreen {
 
             if (Gdx.input.isTouched() && pBounds.contains(touchPos)) {
                 click.play();
+                backSound.resume();
                 gamePaused = false;
             }
 
@@ -521,14 +523,14 @@ public class GameScreen extends AbstractScreen {
 
 
     private void updateBonusItems(float delta) {
-        for (BonusItem bonusItem : bonusItems) {
-            bonusItem.update(delta,backgroundSpeed);
+                    for (BonusItem bonusItem : bonusItems) {
+                        bonusItem.update(delta,backgroundSpeed);
 
-            if (checkCollision(movingObject, bonusItem)) {
-                bonusSoundEffect.play();
-                score += 500;
-                addTemporaryMessage("+500", movingObject.getPosition().x + movingObject.getWidth() / 2, movingObject.getPosition().y + movingObject.getHeight() / 2, 1.0f);
-                bonusItems.remove(bonusItem);
+                        if (checkCollision(movingObject, bonusItem)) {
+                            bonusSoundEffect.play();
+                            score += 500;
+                            addTemporaryMessage("+500", movingObject.getPosition().x + movingObject.getWidth() / 2, movingObject.getPosition().y + movingObject.getHeight() / 2, 1.0f);
+                            bonusItems.remove(bonusItem);
                 break;
             }
         }
@@ -560,7 +562,8 @@ public class GameScreen extends AbstractScreen {
     public void resize(int width, int height) {}
 
     @Override
-    public void pause() {}
+    public void pause() {
+    }
 
     @Override
     public void resume() {}
