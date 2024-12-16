@@ -8,10 +8,13 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.Timer;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
@@ -72,6 +75,14 @@ public class GameScreen2 extends AbstractScreen {
     private Sound click;
     private boolean gamePaused=false;
 
+    private BitmapFont scoreFont;
+    //private BitmapFont messageFont;
+    private BitmapFont levelFont;
+    private  BitmapFont liveFont;
+    private BitmapFont coinFont;
+    private boolean coinGoalReached=false;
+
+
     public GameScreen2(SoaringAdventure game) {
         super(game);
         messages = new ArrayList<>();
@@ -115,12 +126,12 @@ public class GameScreen2 extends AbstractScreen {
 
         bonusTexture = new Texture("bonus.png");
 
-        float width=200;
-        float height=60;
-        psBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2-400, Gdx.graphics.getHeight() / 2 -390, width, height);
-        pBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2-150, Gdx.graphics.getHeight() / 2 -390, width, height);
-        meBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2+100, Gdx.graphics.getHeight() / 2 -390, width, height);
-        rBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2+350, Gdx.graphics.getHeight() / 2 -390, width, height);
+        float width=180;
+        float height=50;
+        psBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2-400, Gdx.graphics.getHeight() / 2 -290, width, height);
+        pBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2-150, Gdx.graphics.getHeight() / 2 -290, width, height);
+        meBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2+100, Gdx.graphics.getHeight() / 2 -290, width, height);
+        rBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2+350, Gdx.graphics.getHeight() / 2 -290, width, height);
 
         timeSinceLastSpawnObstacle1 = 0;
         timeSinceLastSpawnObstacle2 = 0;
@@ -147,8 +158,21 @@ public class GameScreen2 extends AbstractScreen {
 
     @Override
     public void show() {
+        batch = new SpriteBatch();
+
         backSound = Gdx.audio.newSound(Gdx.files.internal("nature.mp3"));
         backSound.play();
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("ShortBaby.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+
+        parameter.size = 36;
+        parameter.color = Color.BLACK;
+        scoreFont = generator.generateFont(parameter);
+        coinFont=generator.generateFont(parameter);
+        parameter.size=48;
+        parameter.color=Color.BLACK;
+        levelFont= generator.generateFont(parameter);
+        generator.dispose();
     }
 
     @Override
@@ -210,12 +234,7 @@ public class GameScreen2 extends AbstractScreen {
             batch.draw(r, rBounds.x, rBounds.y, rBounds.width, rBounds.height);
         }
 
-
-
         movingObject.render(batch);
-
-
-
 
         for (Obstacle obstacle : obstacles) {
             obstacle.render(batch);
@@ -228,19 +247,6 @@ public class GameScreen2 extends AbstractScreen {
             coin.render(batch);
         }
 
-        String levelText = "Level 2 " ;
-        layout.setText(font, levelText);
-        font.draw(batch, levelText, Gdx.graphics.getWidth() - layout.width - 600, Gdx.graphics.getHeight() - 10);
-
-
-        String scoreText = "Score: " + (int) score;
-        layout.setText(font, scoreText);
-        font.draw(batch, scoreText, Gdx.graphics.getWidth() - layout.width - 10, Gdx.graphics.getHeight() - 10);
-
-        String coinText = "Coin: " + (int) coinCount;
-        layout.setText(font, coinText);
-        font.draw(batch, coinText, Gdx.graphics.getWidth() - layout.width - 40, Gdx.graphics.getHeight() - 40);
-
 
 
         if (isGameOver) {
@@ -249,17 +255,44 @@ public class GameScreen2 extends AbstractScreen {
            // addTemporaryMessage("Game over", movingObject.getPosition().x + movingObject.getWidth()+200 / 2, movingObject.getPosition().y + movingObject.getHeight() / 2, 4.0f);
             font.draw(batch, gameOverText, (Gdx.graphics.getWidth() - layout.width) / 2, (Gdx.graphics.getHeight() + layout.height) / 2);
             backgroundSpeed = 0;
-            scoreText = "Score: " + (int) score;
-            layout.setText(font, scoreText);
-            font.draw(batch, scoreText, Gdx.graphics.getWidth() - layout.width - 10, Gdx.graphics.getHeight() - 10);
+
             timeSinceGameOver += Gdx.graphics.getDeltaTime();
             if (timeSinceGameOver >= 2f) {
                 game.setScreen(new GameOverScreen(game, (int) score,(int) coinCount));
             }
         }
-//        if (score >= 1000) {
-//            game.setScreen(new Level2Screen(game));
+//        if (coinCount >= 10){
+//           // addTemporaryMessage("Woh! Bag Collected", movingObject.getPosition().x + movingObject.getWidth()+200 / 2, movingObject.getPosition().y + movingObject.getHeight() / 2, 4.0f);
+//
+//            addTemporaryMessage("Congratulations! Required Coins Earned", movingObject.getPosition().x + movingObject.getWidth()+200 / 2, movingObject.getPosition().y + movingObject.getHeight() / 2, 4.0f);
+//            backgroundSpeed=0;
+//            game.setScreen(new Level3Screen(game));
 //        }
+        if (coinCount >= 10 && !isGameOver && !coinGoalReached) {
+            coinGoalReached = true; // Prevent this block from being executed repeatedly
+            backgroundSpeed = 0;    // Stop background scrolling
+            addTemporaryMessage(
+                    "Congratulations! Required Coins Earned",
+                    movingObject.getPosition().x + movingObject.getWidth() / 2 + 200,
+                    movingObject.getPosition().y + movingObject.getHeight() / 2,
+                    1.0f
+            );
+
+            // Schedule transition to the next screen after 4 seconds
+            Timer.schedule(new Timer.Task() {
+                @Override
+                public void run() {
+                    game.setScreen(new Level3Screen(game)); // Transition to the next level
+                }
+            }, 1.0f);
+        }
+
+
+
+        scoreFont.draw(batch, "Score : " + (int) score, Gdx.graphics.getWidth()-200 - layout.width - 10, Gdx.graphics.getHeight() - 10);
+        coinFont.draw(batch, "Coins : " + (int) coinCount, Gdx.graphics.getWidth()-200 - layout.width - 10, Gdx.graphics.getHeight() - 40);
+        levelFont.draw(batch, "Level 2",Gdx.graphics.getWidth() - layout.width - 700, Gdx.graphics.getHeight() - 10);
+
 
         for (TemporaryMessage message : messages) {
             message.render(batch);
@@ -369,22 +402,23 @@ public class GameScreen2 extends AbstractScreen {
         if (timeSinceLastSpawnCoins >= 3.0f && (coins.isEmpty() || timeSinceLastSpawnCoins >= 1.5f)) {
             float coinX = Gdx.graphics.getWidth();
 
-            // Define the height of the red borders (top and bottom).
-            float upperBorderY = Gdx.graphics.getHeight() - 100; // top red border height
-            float lowerBorderY = Gdx.graphics.getHeight() * 0.25f; // bottom red border height
+
+            float upperBorderY = Gdx.graphics.getHeight() - 100;
+            float lowerBorderY = Gdx.graphics.getHeight() * 0.25f;
 
             // Ensure that the coin Y position is between the bottom and top borders.
             float coinY = random.nextFloat() * (upperBorderY - lowerBorderY - 40) + lowerBorderY; // Adjusted Y range
 
-            float coinWidth = 40;
-            float coinHeight = 40;
+            float coinWidth = 30;
+            float coinHeight = 30;
 
             boolean validPosition = true;
 
             // Check if the coin's position overlaps with obstacle2 objects.
             for (Obstacle obstacle : obstacles) {
                 if (obstacle.getTexture().equals(obstacleTextures[1])) {  // Checking only for obstacle2
-                    if (checkOverlap2(coinX, coinY, coinWidth, coinHeight, obstacle.getX(), obstacle.getY(), obstacle.getWidth(), obstacle.getHeight())) {
+                    float margin = 10f;  // Add a small margin around the obstacle
+                    if (checkOverlap2(coinX, coinY, coinWidth, coinHeight, obstacle.getX() - margin, obstacle.getY() - margin, obstacle.getWidth() + 2 * margin, obstacle.getHeight() + 2 * margin)) {
                         validPosition = false;
                         break;
                     }
@@ -393,21 +427,42 @@ public class GameScreen2 extends AbstractScreen {
 
             // If the position is valid, spawn the row of coins.
             if (validPosition) {
+                float initialCoinX = coinX;
+                float initialCoinY = coinY;
+
+                // Ensure the entire row of coins does not overlap with the obstacle
                 for (int i = 0; i < COINS_IN_ROW; i++) {
-                    Coins coin = new Coins(coinsTexture[0], coinX + i * (coinWidth + COIN_SPACING), coinY, coinWidth, coinHeight, COIN_SPEED);
-                    coins.add(coin);
+                    float currentCoinX = initialCoinX + i * (coinWidth + COIN_SPACING);
+                    for (Obstacle obstacle : obstacles) {
+                        if (obstacle.getTexture().equals(obstacleTextures[1])) {  // Checking only for obstacle2
+                            float margin = 15f;  // Add a small margin around the obstacle
+                            if (checkOverlap2(coinX, coinY, coinWidth, coinHeight, obstacle.getX() - margin, obstacle.getY() - margin, obstacle.getWidth() + 2 * margin, obstacle.getHeight() + 2 * margin)) {
+                                validPosition = false;
+                                break;
+                            }
+                        }
+                    }
+
+                }
+
+                if (validPosition) {
+                    for (int i = 0; i < COINS_IN_ROW; i++) {
+                        Coins coin = new Coins(coinsTexture[0], initialCoinX + i * (coinWidth + COIN_SPACING), initialCoinY, coinWidth, coinHeight, COIN_SPEED);
+                        coins.add(coin);
+                    }
                 }
             }
+
 
             timeSinceLastSpawnCoins = 0;
         }
     }
     public boolean checkOverlap2(float rect1X , float rect1Y, float rect1Width, float rect1Height,
                                 float rect2X, float rect2Y, float rect2Width, float rect2Height) {
-        return rect1X+50 < rect2X + rect2Width &&   // Left side of rect1 is before the right side of rect2
-                rect1X-50 + rect1Width > rect2X &&   // Right side of rect1 is after the left side of rect2
-                rect1Y+50 < rect2Y + rect2Height &&  // Top of rect1 is before the bottom of rect2
-                rect1Y-50 + rect1Height > rect2Y;    // Bottom of rect1 is after the top of rect2
+        return rect1X < rect2X + rect2Width &&   // Left side of rect1 is before the right side of rect2
+                rect1X + rect1Width > rect2X &&   // Right side of rect1 is after the left side of rect2
+                rect1Y < rect2Y + rect2Height &&  // Top of rect1 is before the bottom of rect2
+                rect1Y + rect1Height > rect2Y;    // Bottom of rect1 is after the top of rect2
     }
 
     private void spawnObstacles(float delta) {
@@ -588,8 +643,10 @@ public class GameScreen2 extends AbstractScreen {
 //    }
 
     private boolean checkCollision(GameObject a, GameObject b) {
-        return a.getX() < b.getX() + b.getWidth() && a.getX() + a.getWidth() > b.getX() &&
-                a.getY() < b.getY() + b.getHeight() && a.getY() + a.getHeight() > b.getY();
+
+
+        return a.getX()-20 < b.getX()-20 + b.getWidth()-20 && a.getX()-20 + a.getWidth()-20 > b.getX()-20 &&
+                a.getY()-20 < b.getY()-20 + b.getHeight()-20 && a.getY()-20 + a.getHeight()-20 > b.getY()-20;
     }
 //    public void create() {
 //        if(score>1000)

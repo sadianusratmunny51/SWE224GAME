@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -69,6 +70,9 @@ public class GameScreen extends AbstractScreen {
     private Sound levelWin;
     private Sound end;
     private Sound click;
+    private BitmapFont scoreFont;
+    //private BitmapFont messageFont;
+    private BitmapFont levelFont;
 
     public GameScreen(SoaringAdventure game) {
         super(game);
@@ -107,12 +111,12 @@ public class GameScreen extends AbstractScreen {
 
         bonusTexture = new Texture("bonus.png");
         // bag=new Texture("bag.png");
-        float width=200;
-        float height=60;
-        psBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2-400, Gdx.graphics.getHeight() / 2 -390, width, height);
-        pBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2-150, Gdx.graphics.getHeight() / 2 -390, width, height);
-        meBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2+100, Gdx.graphics.getHeight() / 2 -390, width, height);
-        rBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2+350, Gdx.graphics.getHeight() / 2 -390, width, height);
+        float width=180;
+        float height=50;
+        psBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2-400, Gdx.graphics.getHeight() / 2 -310, width, height);
+        pBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2-150, Gdx.graphics.getHeight() / 2 -310, width, height);
+        meBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2+100, Gdx.graphics.getHeight() / 2 -310, width, height);
+        rBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2+350, Gdx.graphics.getHeight() / 2 -310, width, height);
 
         timeSinceLastSpawnObstacle1 = 0;
         timeSinceLastSpawnObstacle2 = 0;
@@ -140,8 +144,37 @@ public class GameScreen extends AbstractScreen {
     @Override
     public void show() {
 
+        batch = new SpriteBatch();
+
         backSound = Gdx.audio.newSound(Gdx.files.internal("nature.mp3"));
         backSound.play();
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("ShortBaby.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+
+        // General font settings
+        parameter.size = 36; // Change font size as needed
+        parameter.color = Color.BLACK;
+        // font = generator.generateFont(parameter);
+
+        // Score font (you can adjust the parameters for different sizes)
+        //  parameter.size = 48;
+        scoreFont = generator.generateFont(parameter);
+        // levelFont= generator.generateFont(parameter);
+
+
+
+        parameter.color=Color.GREEN;
+        // liveFont= generator.generateFont(parameter);
+        parameter.size=48;
+        parameter.color=Color.BLACK;
+        levelFont= generator.generateFont(parameter);
+
+        // Message font (e.g., for temporary messages)
+        //parameter.size = 30;
+        //messageFont = generator.generateFont(parameter);
+
+
+        generator.dispose();
     }
 
     @Override
@@ -208,7 +241,7 @@ public class GameScreen extends AbstractScreen {
             gamePaused = false;
 
             if (bagCollectedTimer >= 4.0) {
-                game.setScreen(new Level3Screen(game));
+                game.setScreen(new Level2Screen(game));
             }
         }
 
@@ -253,23 +286,23 @@ public class GameScreen extends AbstractScreen {
             bag.render(batch);
         }
 
-        String levelText = "Level 1 " ;
-        layout.setText(font, levelText);
-        font.draw(batch, levelText, Gdx.graphics.getWidth() - layout.width - 600, Gdx.graphics.getHeight() - 10);
-
-
-        String scoreText = "Score: " + (int) score;
-        layout.setText(font, scoreText);
-        font.draw(batch, scoreText, Gdx.graphics.getWidth() - layout.width - 10, Gdx.graphics.getHeight() - 10);
+//        String levelText = "Level 1 " ;
+//        layout.setText(font, levelText);
+//        font.draw(batch, levelText, Gdx.graphics.getWidth() - layout.width - 600, Gdx.graphics.getHeight() - 10);
+//
+//
+//        String scoreText = "Score: " + (int) score;
+//        layout.setText(font, scoreText);
+//        font.draw(batch, scoreText, Gdx.graphics.getWidth() - layout.width - 10, Gdx.graphics.getHeight() - 10);
 
         if (isGameOver) {
             String gameOverText = "Game Over";
             layout.setText(font, gameOverText);
             font.draw(batch, gameOverText, (Gdx.graphics.getWidth() - layout.width) / 2, (Gdx.graphics.getHeight() + layout.height) / 2);
             backgroundSpeed = 0;
-            scoreText = "Score: " + (int) score;
-            layout.setText(font, scoreText);
-            font.draw(batch, scoreText, Gdx.graphics.getWidth() - layout.width - 10, Gdx.graphics.getHeight() - 10);
+//            scoreText = "Score: " + (int) score;
+//            layout.setText(font, scoreText);
+//            font.draw(batch, scoreText, Gdx.graphics.getWidth() - layout.width - 10, Gdx.graphics.getHeight() - 10);
 
             timeSinceGameOver += Gdx.graphics.getDeltaTime();
             if (timeSinceGameOver >= 2f) {
@@ -277,13 +310,18 @@ public class GameScreen extends AbstractScreen {
             }
 
         }
-        if (score >=10) {
-            game.setScreen(new Level3Screen(game));
-        }
+//        if (score >=10) {
+//            game.setScreen(new Level2Screen(game));
+//        }
 
         for (TemporaryMessage message : messages) {
             message.render(batch);
         }
+
+        scoreFont.draw(batch, "Score : " + (int) score, Gdx.graphics.getWidth()-200 - layout.width - 10, Gdx.graphics.getHeight() - 10);
+       // coinFont.draw(batch, "Coins : " + (int) coinCount, Gdx.graphics.getWidth()-200 - layout.width - 10, Gdx.graphics.getHeight() - 40);
+        //messageFont.draw(batch, " -50", 50, Gdx.graphics.getHeight() - 50);
+        levelFont.draw(batch, "Level 1",Gdx.graphics.getWidth() - layout.width - 700, Gdx.graphics.getHeight() - 10);
 
         batch.end();
 

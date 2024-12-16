@@ -23,12 +23,12 @@ public class Introduction extends AbstractScreen{
         batch = new SpriteBatch();
         //helpButton=new Texture("IntroBackgroundImg.png");
         background=new Texture("bb.png");
-        helpButton=new Texture("helpIcon.png");
-        backButton=new Texture("backIcon.png");
+        helpButton=new Texture("help.png");
+        backButton=new Texture("back.png");
         sentence=new Texture("ssIntro.png");
 
-        helpButtonBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2+300, Gdx.graphics.getHeight() / 2-300 , buttonWidth+50, buttonHeight-200);
-        backButtonBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2-350, Gdx.graphics.getHeight() / 2-300, buttonWidth-80 , buttonHeight-200 );
+        helpButtonBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2+400, Gdx.graphics.getHeight() / 2-280 , buttonWidth-100, buttonHeight-230);
+        backButtonBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2-350, Gdx.graphics.getHeight() / 2-280, buttonWidth-100 , buttonHeight-230 );
         sentenceBounds=new Rectangle((Gdx.graphics.getWidth() - buttonWidth-100) / 2-200, Gdx.graphics.getHeight() / 2-230,800 , 500 );
     }
 

@@ -1,6 +1,7 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -15,21 +16,22 @@ public class Level3Screen extends AbstractScreen {
     private Texture dismissButton;
     private Texture background;
     private Texture iconButton;
-    private Texture congratulationsImage;
+    private Texture congratulationsImage,star;
 
-    private Rectangle continueButtonBounds;
+    private Rectangle continueButtonBounds,starBounds;
     private Rectangle dismissButtonBounds;
     private Rectangle iconButtonBounds;
     private SpriteBatch batch;
     float score;
     float coinCount;
-    private BitmapFont levelFont;
+    private BitmapFont levelFont,endingFont;
     private BitmapFont customFont;
     private BitmapFont textFont;
     private float elapsedTime = 0f;
     private float elapsedTime1 = 0f;
     private String levelText = "LEVEL 3";
-    private String fullText = "Congratulations\n             Night Mood Unlocked";
+    private String endingText="The \n   Ending \n         Level";
+    private String fullText = "Congratulations\n          Night Mood Unlocked";
     private String text1 = "Accept the challenge \n        complete the level";
     private StringBuilder displayedText = new StringBuilder();
     private StringBuilder displayedText1 = new StringBuilder();
@@ -39,7 +41,16 @@ public class Level3Screen extends AbstractScreen {
     private Texture starTexture;
     private Vector2[] starPositions;
     private float[] starSpeeds;
-    private int numStars = 50;
+    private int numStars = 80;
+    private Texture fallingCoin;
+    private float fallingSpeed = 100;
+    private Rectangle[] fallingCoinBounds = new Rectangle[4];
+    private boolean[] hasCollided = new boolean[4];
+    private Texture unlockKey;
+    private Rectangle unlockBounds;
+
+    private Sound click;
+
 
 
     public Level3Screen(SoaringAdventure game) {
@@ -49,13 +60,23 @@ public class Level3Screen extends AbstractScreen {
         dismissButton = new Texture("munni4.png");
         iconButton = new Texture("icons.png");
         congratulationsImage = new Texture("congratulation.png");
-        background = new Texture("img_1.png");
+        background = new Texture("level3Back.png");
+        unlockKey=new Texture("unlocked.png");
+
+        click=Gdx.audio.newSound(Gdx.files.internal("click.wav"));
+
+
 
         float buttonWidth = 200;
         float buttonHeight = 80;
-        continueButtonBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 + 500, Gdx.graphics.getHeight() / 2 - 350, buttonWidth, buttonHeight);
-        dismissButtonBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 + 100, Gdx.graphics.getHeight() / 2 - 350, buttonWidth, buttonHeight);
-        iconButtonBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 + 170, Gdx.graphics.getHeight() / 2 + 150, buttonWidth + 100, buttonHeight + 50);
+        continueButtonBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 + 500, Gdx.graphics.getHeight() / 2 - 300, buttonWidth, buttonHeight);
+        dismissButtonBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 + 100, Gdx.graphics.getHeight() / 2 - 300, buttonWidth, buttonHeight);
+        iconButtonBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 +170, Gdx.graphics.getHeight() / 2  +140, buttonWidth + 100, buttonHeight + 50);
+         unlockBounds=new Rectangle( (Gdx.graphics.getWidth() - buttonWidth) / 2 +650, Gdx.graphics.getHeight() / 2 ,70,70);
+
+
+
+
 
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Believe it.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
@@ -67,12 +88,16 @@ public class Level3Screen extends AbstractScreen {
         parameter.size = 60;
         parameter1.size = 60;
         levelParameter.size = 80;
-        parameter.color = Color.VIOLET;
+        parameter.color = Color.PURPLE;
         parameter1.color = Color.SKY;
-        levelParameter.color = Color.GOLDENROD;
+        levelParameter.color = Color.GOLD;
+
         customFont = generator.generateFont(parameter);
         textFont = generator1.generateFont(parameter1);
         levelFont = levelGenerator.generateFont(levelParameter);
+        levelParameter.size=60;
+        levelParameter.color=Color.BLACK;
+        endingFont=levelGenerator.generateFont(levelParameter);
         generator.dispose();
         generator1.dispose();
         levelGenerator.dispose();
@@ -88,7 +113,7 @@ public class Level3Screen extends AbstractScreen {
             float x = MathUtils.random(0, Gdx.graphics.getWidth());
             float y = MathUtils.random(0, Gdx.graphics.getHeight());
             starPositions[i] = new Vector2(x, y);
-            starSpeeds[i] = MathUtils.random(50, 50);
+            starSpeeds[i] = MathUtils.random(5, 5);
         }
     }
 
@@ -119,6 +144,8 @@ public class Level3Screen extends AbstractScreen {
         batch.draw(dismissButton, dismissButtonBounds.x, dismissButtonBounds.y, dismissButtonBounds.width, dismissButtonBounds.height);
         batch.draw(iconButton, iconButtonBounds.x, iconButtonBounds.y, iconButtonBounds.width, iconButtonBounds.height);
 
+
+
         elapsedTime += delta;
         int numLettersToShow = (int) (elapsedTime / letterDelay);
         elapsedTime1 += delta;
@@ -138,13 +165,16 @@ public class Level3Screen extends AbstractScreen {
         displayedText1.setLength(0);
         displayedText1.append(text1, 0, numLettersToShow1);
 
-        customFont.draw(batch, displayedText.toString(), Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2 + 140);
-        textFont.draw(batch, displayedText1.toString(), Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2-100);
+        customFont.draw(batch, displayedText.toString(), Gdx.graphics.getWidth() / 2+50, Gdx.graphics.getHeight() / 2 + 140);
+        textFont.draw(batch, displayedText1.toString(), Gdx.graphics.getWidth() / 2-250, Gdx.graphics.getHeight() / 2-100);
         levelFont.draw(batch, levelText, Gdx.graphics.getWidth() / 2 - 200, Gdx.graphics.getHeight() / 2 + 350);
+        endingFont.draw(batch,endingText, Gdx.graphics.getWidth() / 2 - 550, Gdx.graphics.getHeight() / 2 + 200);
 
         // Show the Congratulations image when the text is fully displayed
         if (showCongratulationsImage) {
-            batch.draw(congratulationsImage, Gdx.graphics.getWidth() / 2+200 , Gdx.graphics.getHeight() / 2-100, 250, 100);
+            batch.draw(congratulationsImage, Gdx.graphics.getWidth() / 2+350 , Gdx.graphics.getHeight() / 2-200, 250, 100);
+            batch.draw(unlockKey, unlockBounds.x, unlockBounds.y, unlockBounds.width, unlockBounds.height);
+
         }
 
 
@@ -169,11 +199,13 @@ public class Level3Screen extends AbstractScreen {
 
         batch.end();
         if (Gdx.input.isTouched()) {
-           // Vector2 touchPos = new Vector2(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
-            if (continueButtonBounds.contains(touchPos)) {
+            Vector2 touchPos1 = new Vector2(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
+            if (continueButtonBounds.contains(touchPos1)) {
+                click.play();
                 game.setScreen(new NightMood(game));
             }
-            if (dismissButtonBounds.contains(touchPos)) {
+            if (dismissButtonBounds.contains(touchPos1)) {
+                click.play();
                 game.setScreen(new GameOverScreen(game, (int) score, (int) coinCount));
             }
         }

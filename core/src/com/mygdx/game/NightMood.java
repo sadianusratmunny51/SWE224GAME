@@ -7,9 +7,11 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -38,7 +40,7 @@ public class NightMood extends AbstractScreen {
 
     private int score;
     float coinCount=0;
-    private BitmapFont font;
+    //private BitmapFont font;
     private GlyphLayout layout;
 
     private Texture[] obstacleTextures;
@@ -70,7 +72,7 @@ public class NightMood extends AbstractScreen {
     private ArrayList<Coins> coins;
    // private int coinCount = 0;
     private boolean gamePaused = false;
-    private Sound bonusSoundEffect;
+
     private Sound backSound;
     private  Sound hitSound;
     private Sound levelWin;
@@ -82,14 +84,31 @@ public class NightMood extends AbstractScreen {
     private float starSpawnInterval;
     private float[] starSpawnPositions;
     float timeSinceLastSpawnCoins ;
+    private int maxLives = 5; // Maximum lives
+    private int currentLives = maxLives;
+
+    private BitmapFont font;
+    private BitmapFont scoreFont;
+    //private BitmapFont messageFont;
+    private BitmapFont levelFont;
+    private  BitmapFont liveFont;
+    private BitmapFont coinFont;
+    //private float score;
+   // private Array<String> messages;
+    private float messageTimer = 0f; // Timer for how long to display the message
+    private final float messageDuration = 1f; // Duration to show the message in seconds
+    private boolean showLifeMessage = false; // Flag to control message visibility
+    private Sound bonusSoundEffect;
+    private Sound coinSound;
+    private Sound life;
 
 
     public NightMood(SoaringAdventure game) {
         super(game);
         messages = new ArrayList<>();
         batch = new SpriteBatch();
-        background = new Texture("nightMood1.png");
-        background2 = new Texture("nightMood1.png");
+        background = new Texture("night.png");
+        background2 = new Texture("night.png");
         p=new Texture("pppp.png");
         ps=new Texture("pause.png");
         me=new Texture("menu.png");
@@ -127,12 +146,12 @@ public class NightMood extends AbstractScreen {
         starTexture = new Texture("star33.png");
         //bonusTexture = new Texture("bonus.png");
         // bag=new Texture("bag.png");
-        float width=200;
-        float height=60;
-        psBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2-400, Gdx.graphics.getHeight() / 2 -390, width, height);
-        pBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2-150, Gdx.graphics.getHeight() / 2 -390, width, height);
-        meBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2+100, Gdx.graphics.getHeight() / 2 -390, width, height);
-        rBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2+350, Gdx.graphics.getHeight() / 2 -390, width, height);
+        float width=180;
+        float height=50;
+        psBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2-400, Gdx.graphics.getHeight() / 2 -310, width, height);
+        pBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2-150, Gdx.graphics.getHeight() / 2 -310, width, height);
+        meBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2+100, Gdx.graphics.getHeight() / 2 -310, width, height);
+        rBounds = new Rectangle((Gdx.graphics.getWidth() - width) / 2+350, Gdx.graphics.getHeight() / 2 -310, width, height);
 
         timeSinceLastSpawnObstacle1 = 0;
         timeSinceLastSpawnObstacle2 = 0;
@@ -155,24 +174,57 @@ public class NightMood extends AbstractScreen {
         isGameOver = false;
         bag = null;
         isBagSpawned = false;
-        bonusSoundEffect = Gdx.audio.newSound(Gdx.files.internal("bonus (2).mp3"));
+        bonusSoundEffect = Gdx.audio.newSound(Gdx.files.internal("starEating.mp3"));
         hitSound= Gdx.audio.newSound(Gdx.files.internal("hit.mp3"));
+        coinSound=Gdx.audio.newSound(Gdx.files.internal("coin.mp3"));
         levelWin=Gdx.audio.newSound(Gdx.files.internal("level-win.mp3"));
         end=Gdx.audio.newSound(Gdx.files.internal("End.mp3"));
         click=Gdx.audio.newSound(Gdx.files.internal("click.wav"));
+        life=Gdx.audio.newSound(Gdx.files.internal("life.mp3"));
 
     }
 
     @Override
     public void show() {
+        batch = new SpriteBatch();
 
         backSound = Gdx.audio.newSound(Gdx.files.internal("nature.mp3"));
         backSound.play();
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("ShortBaby.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+
+        // General font settings
+        parameter.size = 36; // Change font size as needed
+        parameter.color = Color.WHITE;
+       // font = generator.generateFont(parameter);
+
+        // Score font (you can adjust the parameters for different sizes)
+      //  parameter.size = 48;
+        scoreFont = generator.generateFont(parameter);
+       // levelFont= generator.generateFont(parameter);
+
+        coinFont=generator.generateFont(parameter);
+
+         parameter.color=Color.GREEN;
+        liveFont= generator.generateFont(parameter);
+        parameter.size=48;
+        parameter.color=Color.GOLDENROD;
+        levelFont= generator.generateFont(parameter);
+
+        // Message font (e.g., for temporary messages)
+        //parameter.size = 30;
+        //messageFont = generator.generateFont(parameter);
+
+
+        generator.dispose();
     }
 
     @Override
     public void render(float delta) {
-        ScreenUtils.clear(0, 0, 1, 1);
+
+
+
+
 
         if (gamePaused) {
             renderPaused();
@@ -204,8 +256,16 @@ public class NightMood extends AbstractScreen {
 
         }
 
+        if (showLifeMessage) {
+            messageTimer += delta;
+            if (messageTimer >= messageDuration) {
+                showLifeMessage = false; // Hide the message after duration
+            }
+        }
 
         batch.begin();
+
+        ScreenUtils.clear(0, 0, 1, 1);
 
 
         batch.draw(background, backgroundX, 0, background.getWidth(), Gdx.graphics.getHeight());
@@ -248,27 +308,13 @@ public class NightMood extends AbstractScreen {
             coin.render(batch);
         }
 
-        String levelText = "Level 3 " ;
-        layout.setText(font, levelText);
-        font.draw(batch, levelText, Gdx.graphics.getWidth() - layout.width - 600, Gdx.graphics.getHeight() - 10);
 
-
-        String scoreText = "Score: " + (int) score;
-        layout.setText(font, scoreText);
-        font.draw(batch, scoreText, Gdx.graphics.getWidth() - layout.width - 10, Gdx.graphics.getHeight() - 10);
-
-        String coinText = "Coin: " + (int) coinCount;
-        layout.setText(font, coinText);
-        font.draw(batch, coinText, Gdx.graphics.getWidth() - layout.width - 40, Gdx.graphics.getHeight() - 40);
 
         if (isGameOver) {
             String gameOverText = "Game Over";
             layout.setText(font, gameOverText);
             font.draw(batch, gameOverText, (Gdx.graphics.getWidth() - layout.width) / 2, (Gdx.graphics.getHeight() + layout.height) / 2);
             backgroundSpeed = 0;
-            scoreText = "Score: " + (int) score;
-            layout.setText(font, scoreText);
-            font.draw(batch, scoreText, Gdx.graphics.getWidth() - layout.width - 10, Gdx.graphics.getHeight() - 10);
 
             timeSinceGameOver += Gdx.graphics.getDeltaTime();
             if (timeSinceGameOver >= 2f) {
@@ -285,6 +331,21 @@ public class NightMood extends AbstractScreen {
         }
         for (StarItem star : starItems) {
             star.render(batch);
+        }
+
+        //font.draw(batch, "Lives: " + currentLives, 50, Gdx.graphics.getHeight() - 50);  // Draw lives at the top-left corner
+
+
+
+
+        scoreFont.draw(batch, "Score : " + (int) score, Gdx.graphics.getWidth()-200 - layout.width - 10, Gdx.graphics.getHeight() - 10);
+        coinFont.draw(batch, "Coins : " + (int) coinCount, Gdx.graphics.getWidth()-200 - layout.width - 10, Gdx.graphics.getHeight() - 40);
+        //messageFont.draw(batch, " -50", 50, Gdx.graphics.getHeight() - 50);
+        levelFont.draw(batch, "Level 3",Gdx.graphics.getWidth() - layout.width - 700, Gdx.graphics.getHeight() - 10);
+        liveFont.draw(batch, "Life: " + (int) currentLives, 20, Gdx.graphics.getHeight() - 20);
+
+        if (showLifeMessage) {
+            liveFont.draw(batch, "Life +1", 20, Gdx.graphics.getHeight() - 50);
         }
 
 
@@ -370,27 +431,28 @@ public class NightMood extends AbstractScreen {
     }
 
     private void spawnCoins(float delta) {
-        timeSinceLastSpawnCoins+=delta;
+        timeSinceLastSpawnCoins += delta;
 
         if (timeSinceLastSpawnCoins >= 3.0f && (coins.isEmpty() || timeSinceLastSpawnCoins >= 1.5f)) {
             float coinX = Gdx.graphics.getWidth();
 
-            // Define the height of the red borders (top and bottom).
-            float upperBorderY = Gdx.graphics.getHeight() - 100; // top red border height
-            float lowerBorderY = Gdx.graphics.getHeight() * 0.25f; // bottom red border height
+
+            float upperBorderY = Gdx.graphics.getHeight() - 100;
+            float lowerBorderY = Gdx.graphics.getHeight() * 0.25f;
 
             // Ensure that the coin Y position is between the bottom and top borders.
             float coinY = random.nextFloat() * (upperBorderY - lowerBorderY - 40) + lowerBorderY; // Adjusted Y range
 
-            float coinWidth = 40;
-            float coinHeight = 40;
+            float coinWidth = 30;
+            float coinHeight = 30;
 
             boolean validPosition = true;
 
             // Check if the coin's position overlaps with obstacle2 objects.
             for (Obstacle obstacle : obstacles) {
                 if (obstacle.getTexture().equals(obstacleTextures[1])) {  // Checking only for obstacle2
-                    if (checkOverlap(coinX, coinY, coinWidth, coinHeight, obstacle.getX(), obstacle.getY(), obstacle.getWidth(), obstacle.getHeight())) {
+                    float margin = 10f;  // Add a small margin around the obstacle
+                    if (checkOverlap(coinX, coinY, coinWidth, coinHeight, obstacle.getX() - margin, obstacle.getY() - margin, obstacle.getWidth() + 2 * margin, obstacle.getHeight() + 2 * margin)) {
                         validPosition = false;
                         break;
                     }
@@ -399,11 +461,32 @@ public class NightMood extends AbstractScreen {
 
             // If the position is valid, spawn the row of coins.
             if (validPosition) {
+                float initialCoinX = coinX;
+                float initialCoinY = coinY;
+
+                // Ensure the entire row of coins does not overlap with the obstacle
                 for (int i = 0; i < COINS_IN_ROW; i++) {
-                    Coins coin = new Coins(coinsTexture[0], coinX + i * (coinWidth + COIN_SPACING), coinY, coinWidth, coinHeight, COIN_SPEED);
-                    coins.add(coin);
+                    float currentCoinX = initialCoinX + i * (coinWidth + COIN_SPACING);
+                    for (Obstacle obstacle : obstacles) {
+                        if (obstacle.getTexture().equals(obstacleTextures[1])) {  // Checking only for obstacle2
+                            float margin = 15f;  // Add a small margin around the obstacle
+                            if (checkOverlap(coinX, coinY, coinWidth, coinHeight, obstacle.getX() - margin, obstacle.getY() - margin, obstacle.getWidth() + 2 * margin, obstacle.getHeight() + 2 * margin)) {
+                                validPosition = false;
+                                break;
+                            }
+                        }
+                    }
+
+                }
+
+                if (validPosition) {
+                    for (int i = 0; i < COINS_IN_ROW; i++) {
+                        Coins coin = new Coins(coinsTexture[0], initialCoinX + i * (coinWidth + COIN_SPACING), initialCoinY, coinWidth, coinHeight, COIN_SPEED);
+                        coins.add(coin);
+                    }
                 }
             }
+
 
             timeSinceLastSpawnCoins = 0;
         }
@@ -422,7 +505,7 @@ public class NightMood extends AbstractScreen {
             // Create a new star item
             StarItem starItem = new StarItem(x, y, width, height, starTexture);
             starItems.add(starItem);
-            Gdx.app.log("StarSpawn", "Spawned a star at x: " + x + ", y: " + y);
+
             timeSinceLastSpawnStar = 0;
         }
     }
@@ -451,6 +534,10 @@ public class NightMood extends AbstractScreen {
             // Check collision with the moving object
             if (checkCollision(movingObject, star)) {
                 // Handle the collision (e.g., increase score)
+               //currentLives++;
+                bonusSoundEffect.play();
+                score+=500;
+                addTemporaryMessage("+500", movingObject.getPosition().x + movingObject.getWidth() / 2, movingObject.getPosition().y + movingObject.getHeight() / 2, 1.0f);
 
                 starIterator.remove(); // Remove the star after collision
             }
@@ -468,7 +555,7 @@ public class NightMood extends AbstractScreen {
         timeSinceLastSpawnObstacle1 += delta;
         timeSinceLastSpawnObstacle2 += delta;
 
-        if (timeSinceLastSpawnObstacle1 >= 8.0f && (obstacles.isEmpty() || timeSinceLastSpawnObstacle1 >= maxSpawnInterval)) {
+        if (timeSinceLastSpawnObstacle1 >= 4.0f && (obstacles.isEmpty() || timeSinceLastSpawnObstacle1 >= maxSpawnInterval)) {
             spawnobject(obstacleTextures[0]);
             timeSinceLastSpawnObstacle1 = 0;
         }
@@ -547,7 +634,7 @@ private void spawnBonusItem(float delta) {
             }
 
         }
-        if(validPosition) {
+        if(validPosition && currentLives<=2) {
             bonusItems.add(new BonusItem(bonusX, bonusY, bonusWidth, bonusHeight, bonusTexture));
         }
         timeSinceLastSpawnBonus = 0;
@@ -558,9 +645,10 @@ private void spawnBonusItem(float delta) {
             bonusItem.update(delta,backgroundSpeed);
 
             if (checkCollision(movingObject, bonusItem)) {
-                bonusSoundEffect.play();
-                score += 500;
-                addTemporaryMessage("+500", movingObject.getPosition().x + movingObject.getWidth() / 2, movingObject.getPosition().y + movingObject.getHeight() / 2, 1.0f);
+                life.play();
+                currentLives++;
+                showLifeMessage = true; // Set flag to show the message
+                messageTimer = 0f; // Reset timer
                 bonusItems.remove(bonusItem);
                 break;
             }
@@ -587,11 +675,20 @@ private void spawnBonusItem(float delta) {
 
             // Check collision with obstacle2
             if (obstacle.getTexture() == obstacleTextures[1] && checkCollision(movingObject, obstacle)) {
+                currentLives--;
+                addTemporaryMessage("", movingObject.getPosition().x + movingObject.getWidth() / 2, movingObject.getPosition().y + movingObject.getHeight() / 2, 1.0f);
                 hitSound.play();
                 score = Math.max(0, score - 50);
                 addTemporaryMessage("-50", movingObject.getPosition().x + movingObject.getWidth() / 2, movingObject.getPosition().y + movingObject.getHeight() / 2, 1.0f);
                 isGameOver = false;
 
+                if (currentLives <= 0) {
+
+                    end.play();
+                    isGameOver = true;
+                    font.getData().setScale(2.0f);
+                    break;
+                }
 
                 obstacleIterator.remove();
                 obstacle2Count--;
@@ -619,7 +716,7 @@ private void spawnBonusItem(float delta) {
             }
 
             if (movingObject.overlaps(coin)) {
-               // coinSound.play();
+                coinSound.play();
                 coinCount++;
                 coinIterator.remove();
 //                TemporaryMessage message = new TemporaryMessage("+1 Coin", 2.0f, coin.getX(), coin.getY());

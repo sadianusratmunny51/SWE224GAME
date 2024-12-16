@@ -74,7 +74,7 @@ public class MainMenuScreen extends AbstractScreen {
         batch = new SpriteBatch();
         playButton = new Texture("playButton.png");
         exitButton = new Texture("exit1.png");
-        gameworld = new Texture("gameworld.png");
+        gameworld = new Texture("gaming.png");
       //  mainImage = new Texture("mainImage.png");
         background = new Texture("front.png");
         object = new Texture("object1.png");
@@ -88,18 +88,18 @@ public class MainMenuScreen extends AbstractScreen {
 
         float buttonWidth = 300;
         float buttonHeight = 300;
-        playButtonBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2, Gdx.graphics.getHeight() / 2 -100, buttonWidth, buttonHeight-230);
-        exitButtonBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2, Gdx.graphics.getHeight() / 2 - 200, buttonWidth , buttonHeight - 230);
-        gameworldbounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2, Gdx.graphics.getHeight() / 2 + 200, buttonWidth, buttonHeight);
+        playButtonBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2, Gdx.graphics.getHeight() / 2 -100, 200, 60);
+        exitButtonBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2, Gdx.graphics.getHeight() / 2 - 200, 200 , 60);
+        gameworldbounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2, Gdx.graphics.getHeight() / 2 + 220, buttonWidth, 150);
         //mainImagebounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth - 400) / 2, Gdx.graphics.getHeight() / 2 - 50, buttonWidth + 500, buttonHeight + 150);
-        objectBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 - 450, Gdx.graphics.getHeight() / 2 - 200, buttonWidth, buttonHeight - 170);
+        objectBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 - 450, Gdx.graphics.getHeight() / 2 - 200, 200, 70);
         obst1Bounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 + 600, Gdx.graphics.getHeight() / 2 + 220, buttonWidth - 200, buttonHeight - 200);
         obst2Bounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 + 550, Gdx.graphics.getHeight() / 2 + 170, buttonWidth - 240, buttonHeight - 240);
         obst2pBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 + 650, Gdx.graphics.getHeight() / 2 + 130, buttonWidth - 240, buttonHeight - 240);
         bonusBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 + 600, Gdx.graphics.getHeight() / 2 + 40, buttonWidth - 220, buttonHeight - 220);
         goldCoinBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 - 480, Gdx.graphics.getHeight() / 2 -90, buttonWidth - 200, buttonHeight - 200);
         //goldCoinBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2 + 700,
-        introBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2, Gdx.graphics.getHeight() / 2 - 300, buttonWidth , buttonHeight - 230);
+        introBounds = new Rectangle((Gdx.graphics.getWidth() - buttonWidth) / 2, Gdx.graphics.getHeight() / 2 - 300, 200,60);
         for (int i = 0; i < fallingCoinBounds.length; i++) {
             fallingCoinBounds[i] = new Rectangle(
                     goldCoinBounds.x + 20 * i,
@@ -285,6 +285,7 @@ public class MainMenuScreen extends AbstractScreen {
 
     @Override
     public void hide() {
+
         jumpSound.stop();
     }
 
